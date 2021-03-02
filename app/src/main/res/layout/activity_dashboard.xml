@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    tools:context=".Dashbaord.Dashboard">
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:indeterminate="true"/>
+    <!--Toolbar-->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar.main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/Theme.GuidelinesCompat.Light.ColoredToolbar"
+        app:titleMarginStart="12dp"
+        app:title="@string/app_name"
+        app:titleTextAppearance="?textAppearanceHeadline5"
+        app:titleTextColor="@color/secondaryColor" />
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragmentParent"
+        android:name="com.e.wallzhub.Fragments.FragmentParent"/>
+
+</LinearLayout>
