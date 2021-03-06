@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.R;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -34,8 +35,21 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    public void clear() {
+        imageModels.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(List<ImageModel> imageModels) {
+        imageModels.addAll(imageModels);
+    }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        try {
+            holder.settingImage(imageModels.get(position).getSrc());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -52,10 +66,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             mImageView = itemView.findViewById(R.id.image_main);
         }
 
-        private void settingImage(JSONObject src){
-//            Glide.with(context.getApplicationContext()).load(imageUrl).placeholder(R.drawable.fdd)
-//                    .error(R.drawable.fdd)
-//                    .into(mImageView);
+        private void settingImage(JSONObject src) throws JSONException {
+            Glide.with(context.getApplicationContext()).load(src.getString("medium")).placeholder(R.mipmap.ic_launcher_foreground)
+                    .error(R.mipmap.ic_launcher_foreground)
+                    .into(mImageView);
         }
     }
 }

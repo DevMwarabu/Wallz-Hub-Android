@@ -20,14 +20,16 @@ import com.e.wallzhub.Fragments.FragmentParent;
 import com.e.wallzhub.R;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 public class Dashboard extends AppCompatActivity {
-    private Toolbar toolbar;
+    public static Toolbar toolbar;
     private FragmentParent fragmentParent;
     private ProgressBar mProgressBar;
     public static List<Collection> collectionsMain;
@@ -63,7 +65,12 @@ public class Dashboard extends AppCompatActivity {
                 if (collections.length()>0) {
                     mProgressBar.setVisibility(View.GONE);
 
-                    for (int c = 0; c < collections.length(); c++) {
+                    fragmentParent.addPage("All");
+                    //default colection
+                    Collection collectionDft = new Collection("All");
+                    collectionsMain.add(collectionDft);
+
+                    for (int c = 0; c < shuffleJsonArray(collections).length(); c++) {
                         JSONObject collection = collections.getJSONObject(c);
                         String strCatName = collection.getString("strCatName");
 
@@ -93,5 +100,20 @@ public class Dashboard extends AppCompatActivity {
         //adding the string request to request queue
         requestQueue.add(stringRequest);
 
+    }
+
+
+    public static JSONArray shuffleJsonArray (JSONArray array) throws JSONException {
+        // Implementing Fisher–Yates shuffle
+        Random rnd = new Random();
+        for (int i = array.length() - 1; i >= 0; i--)
+        {
+            int j = rnd.nextInt(i + 1);
+            // Simple swap
+            Object object = array.get(j);
+            array.put(j, array.get(i));
+            array.put(i, object);
+        }
+        return array;
     }
 }

@@ -22,7 +22,7 @@
             app:tabGravity="fill"
             app:tabIconTint="@color/bottom_navigation_colors"
             app:tabIndicatorColor="@color/secondaryColor"
-            app:tabIndicatorFullWidth="true"
+            app:tabIndicatorFullWidth="false"
             app:tabIndicatorGravity="bottom"
             app:tabIndicatorHeight="1dp"
             app:tabMode="scrollable"
