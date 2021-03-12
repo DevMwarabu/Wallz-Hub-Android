@@ -16,6 +16,9 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.Fragments.FragmentChild;
 import com.e.wallzhub.ImageDesc;
@@ -45,8 +48,7 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        switch (viewType)
-        {
+        switch (viewType) {
             case ITEM_TYPE_BANNER_AD:
                 //Inflate ad banner container
                 View bannerLayoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.banner_ad_row, parent, false);
@@ -76,25 +78,22 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void addAll(List<ImageModel> imageModels) {
         imageModels.addAll(imageModels);
     }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         int viewType = getItemViewType(position);
 
-        switch (viewType)
-        {
+        switch (viewType) {
             case ITEM_TYPE_BANNER_AD:
-                if (imageModels.get(position) instanceof AdView)
-                {
+                if (imageModels.get(position) instanceof AdView) {
                     MyAdViewHolder bannerHolder = (MyAdViewHolder) holder;
                     AdView adView = (AdView) imageModels.get(position);
                     ViewGroup adCardView = (ViewGroup) bannerHolder.itemView;
-                    if (adCardView.getChildCount() > 0)
-                    {
+                    if (adCardView.getChildCount() > 0) {
                         adCardView.removeAllViews();
                     }
-                    if (adView.getParent() != null)
-                    {
+                    if (adView.getParent() != null) {
                         ((ViewGroup) adView.getParent()).removeView(adView);
                     }
 
@@ -105,8 +104,7 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             case ITEM_TYPE_COUNTRY:
             default:
-                if (imageModels.get(position) instanceof ImageModel)
-                {
+                if (imageModels.get(position) instanceof ImageModel) {
                     ViewHolderMain viewHolderMain = (ViewHolderMain) holder;
                     ImageModel imageModel = (ImageModel) imageModels.get(position);
                     //setting data
@@ -142,25 +140,22 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public int getItemViewType(int position)
-    {
-        if (position == 0 || imageModels.get(position) instanceof ImageModel)
-        {
+    public int getItemViewType(int position) {
+        if (position == 0 || imageModels.get(position) instanceof ImageModel) {
             return ITEM_TYPE_COUNTRY;
-        } else
-        {
+        } else {
             return (position % FragmentChild.ITEMS_PER_AD == 0) ? ITEM_TYPE_BANNER_AD : ITEM_TYPE_COUNTRY;
         }
     }
 
     @Override
-    public long getItemId(int position)
-    {
+    public long getItemId(int position) {
         return position;
     }
 
     public class ViewHolderMain extends RecyclerView.ViewHolder {
         private ImageView mImageView;
+
         public ViewHolderMain(@NonNull View itemView) {
             super(itemView);
 
@@ -168,15 +163,19 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private void settingImage(JSONObject src) throws JSONException {
-            Glide.with(context.getApplicationContext()).load(src.getString("medium")).placeholder(R.mipmap.ic_launcher_foreground)
+            Glide.with(context.getApplicationContext()).load(src.getString("medium"))
+                    .apply(new RequestOptions()
+                            .fitCenter()
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(Target.SIZE_ORIGINAL))
+                    .placeholder(R.mipmap.ic_launcher_foreground)
                     .error(R.mipmap.ic_launcher_foreground)
                     .into(mImageView);
         }
     }
-    public class MyAdViewHolder extends RecyclerView.ViewHolder
-    {
-        MyAdViewHolder(View itemView)
-        {
+
+    public class MyAdViewHolder extends RecyclerView.ViewHolder {
+        MyAdViewHolder(View itemView) {
             super(itemView);
         }
     }

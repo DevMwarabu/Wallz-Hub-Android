@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="Share">
+        <menu>
+            <item
+                android:id="@+id/nav.share"
+                android:title="Share"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/nav.update"
+                android:title="Update"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/nav.more"
+                android:title="More Apps"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
+    <item
+        android:title="Wallz Hub">
+        <menu>
+            <item
+                android:id="@+id/nav.facebook"
+                android:title="Facebook"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/nav.instagram"
+                android:title="Instagram"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/nav.twitter"
+                android:title="Twitter"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/nav.about"
+        android:title="About Us"
+        app:showAsAction="never"/>
+
+</menu>

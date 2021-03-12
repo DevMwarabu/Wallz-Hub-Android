@@ -39,8 +39,7 @@
         <item name="windowNoTitle">true</item>
         <item name="android:actionMenuTextColor">@android:color/black</item>
         <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
-        <item name="android:navigationBarColor" tools:ignore="NewApi">@android:color/white</item>
-        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">@android:color/black</item>
     </style>
 
     <style name="SheetDialog" parent="Theme.Design.Light.BottomSheetDialog">

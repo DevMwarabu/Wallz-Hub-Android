@@ -1,5 +1,7 @@
 package com.e.wallzhub;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -13,7 +15,9 @@ import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,6 +42,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.e.wallzhub.Constants.Adapters.AdapterAds;
 import com.e.wallzhub.Constants.Adapters.AdapterDEsc;
 import com.e.wallzhub.Constants.Adapters.CenterZoomLayoutManager;
@@ -46,7 +56,11 @@ import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.Dashbaord.Dashboard;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.krishna.fileloader.FileLoader;
 import com.krishna.fileloader.listener.FileRequestListener;
 import com.krishna.fileloader.pojo.FileResponse;
@@ -79,6 +93,8 @@ public class ImageDesc extends AppCompatActivity {
     private AdapterDEsc adapter;
     private List<ImageModel> imageModels;
     private ProgressDialog progressDialog;
+    private InterstitialAd mInterstitialAd;
+    private AdRequest adRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +102,8 @@ public class ImageDesc extends AppCompatActivity {
         setContentView(R.layout.activity_image_desc);
 
         MobileAds.initialize(this, getString(R.string.appid));
-        mAdView =(AdView) findViewById(R.id.adview);
+
+        mAdView = (AdView) findViewById(R.id.adview);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
@@ -130,10 +147,72 @@ public class ImageDesc extends AppCompatActivity {
 
     }
 
+    public void InterstitialAdmob() {
+        InterstitialAd.load(ImageDesc.this,getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
+            @Override
+            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                // The mInterstitialAd reference will be null until
+                // an ad is loaded.
+                mInterstitialAd = interstitialAd;
+                if (mInterstitialAd !=null){
+                    mInterstitialAd.show(ImageDesc.this);
+                }
+                mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        super.onAdDismissedFullScreenContent();
+                        mInterstitialAd=null;
+
+                    }
+
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(com.google.android.gms.ads.AdError adError) {
+                        super.onAdFailedToShowFullScreenContent(adError);
+                        mInterstitialAd = null;
+                        /// perform your action here when ad will not load
+                    }
+
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        super.onAdShowedFullScreenContent();
+                        mInterstitialAd = null;
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                // Handle the error
+                mInterstitialAd = null;
+
+
+            }
+
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        adRequest = new AdRequest.Builder().build();
+        InterstitialAdmob();
+    }
+
     private void getData(String collection, JSONObject src) throws JSONException {
         //setting imageView
-        Glide.with(getApplicationContext()).load(src.getString("medium")).placeholder(R.mipmap.ic_launcher_foreground)
+        Glide.with(getApplicationContext()).load(src.getString("large"))
+                .apply(new RequestOptions()
+                        .centerCrop()
+                        .dontTransform()
+                        .format(DecodeFormat.PREFER_ARGB_8888))
+                .placeholder(R.mipmap.ic_launcher_foreground)
                 .error(R.mipmap.ic_launcher_foreground)
+                .dontAnimate()
+                .override(mImageView.getMeasuredWidth(),mImageView.getMeasuredHeight())
                 .into(mImageView);
 
         //loading data

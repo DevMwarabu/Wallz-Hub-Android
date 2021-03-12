@@ -21,8 +21,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.WallzHub">
-        <activity android:name=".ImageDesc"
-            android:theme="@style/Theme.ImageDesc"/>
+        <activity android:name=".Dashbaord.AboutUs"></activity>
+        <activity
+            android:name=".ImageDesc"
+            android:theme="@style/Theme.ImageDesc" />
         <activity android:name=".Dashbaord.Dashboard" />
         <activity
             android:name=".MainActivity"

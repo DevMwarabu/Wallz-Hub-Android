@@ -16,6 +16,9 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.ImageDesc;
 import com.e.wallzhub.R;
@@ -53,6 +56,7 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
     public void addAll(List<ImageModel> imageModels) {
         imageModels.addAll(imageModels);
     }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         try {
@@ -73,7 +77,7 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
                 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
                 v.getContext().startActivity(intent, options.toBundle());
                 //finishing activity
-                ((Activity)context).finish();
+                ((Activity) context).finish();
 
             }
         });
@@ -87,6 +91,7 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView mImageView;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -94,7 +99,12 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
         }
 
         private void settingImage(JSONObject src) throws JSONException {
-            Glide.with(context.getApplicationContext()).load(src.getString("medium")).placeholder(R.mipmap.ic_launcher_foreground)
+            Glide.with(context.getApplicationContext()).load(src.getString("medium"))
+                    .apply(new RequestOptions()
+                            .fitCenter()
+                            .format(DecodeFormat.PREFER_ARGB_8888)
+                            .override(Target.SIZE_ORIGINAL))
+                    .placeholder(R.mipmap.ic_launcher_foreground)
                     .error(R.mipmap.ic_launcher_foreground)
                     .into(mImageView);
         }

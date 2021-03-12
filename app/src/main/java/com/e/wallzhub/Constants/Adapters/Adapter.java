@@ -11,12 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
+import com.e.wallzhub.Constants.Models.AboutModel;
 import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.ImageDesc;
 import com.e.wallzhub.R;
@@ -27,10 +32,10 @@ import org.json.JSONObject;
 import java.util.List;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
-    private List<ImageModel> imageModels;
+    private List<AboutModel> imageModels;
     private Context context;
 
-    public Adapter(List<ImageModel> imageModels, Context context) {
+    public Adapter(List<AboutModel> imageModels, Context context) {
         this.imageModels = imageModels;
         this.context = context;
     }
@@ -38,7 +43,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_main, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_about, parent, false);
         context = parent.getContext();
         return new ViewHolder(view);
     }
@@ -51,28 +56,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public void addAll(List<ImageModel> imageModels) {
         imageModels.addAll(imageModels);
     }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        try {
-            holder.settingImage(imageModels.get(position).getSrc());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        holder.mImageView.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, ImageDesc.class);
-                intent.putExtra("src", imageModels.get(position).getSrc().toString());
-                intent.putExtra("collection", imageModels.get(position).getId());
-
-                Pair<View, String> p1 = Pair.create((View) holder.mImageView, "image");
-
-                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
-                v.getContext().startActivity(intent, options.toBundle());
-            }
-        });
-
+        holder.settingImage(imageModels.get(position).getTitle(),imageModels.get(position).getBody());
     }
 
     @Override
@@ -81,17 +68,18 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private ImageView mImageView;
+        private TextView mTitle,mBody;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            mImageView = itemView.findViewById(R.id.image_main);
+            mTitle = itemView.findViewById(R.id.tv_title);
+            mBody = itemView.findViewById(R.id.tv_body);
         }
 
-        private void settingImage(JSONObject src) throws JSONException {
-            Glide.with(context.getApplicationContext()).load(src.getString("medium")).placeholder(R.mipmap.ic_launcher_foreground)
-                    .error(R.mipmap.ic_launcher_foreground)
-                    .into(mImageView);
+        private void settingImage(String title,String body) {
+            mTitle.setText(title);
+            mBody.setText(body);
         }
     }
 }

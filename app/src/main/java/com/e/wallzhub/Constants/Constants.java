@@ -9,6 +9,7 @@ public class Constants {
     public static final String gettingUniversities = mainUrl + "gettingUniversities.php";
     public static final String fileUrls = "https://shop4me.co.ke/FindPlaces/Files/";
     public static final String collectionsUrl = fileUrls+"strWallzCategiroes.json";
+    public static final String about_policy = fileUrls+"about_policy.json";
 
     public static final String baseUrl = "https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=24&page=1";
     public static final String api_key = "563492ad6f91700001000001de3d79774a1b4e25b5169d05ac0e39fa";

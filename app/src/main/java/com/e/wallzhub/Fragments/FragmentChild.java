@@ -25,7 +25,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.e.wallzhub.Constants.Adapters.Adapter;
 import com.e.wallzhub.Constants.Adapters.AdapterAds;
 import com.e.wallzhub.Constants.Constants;
 import com.e.wallzhub.Constants.Models.ImageModel;

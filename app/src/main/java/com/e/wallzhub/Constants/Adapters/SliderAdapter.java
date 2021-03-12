@@ -1,12 +1,16 @@
 package com.e.wallzhub.Constants.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.request.RequestOptions;
 import com.e.wallzhub.Constants.Models.Advert;
 import com.e.wallzhub.R;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -63,8 +67,23 @@ public class SliderAdapter extends SliderViewAdapter<SliderAdapter.SliderAdapter
 
         Advert sliderItem = stringUrls.get(position);
         //setting values
-        Glide.with(context.getApplicationContext()).load(sliderItem.getStrImageUrl()).placeholder(R.drawable.ic_launcher_foreground)
+        Glide.with(context.getApplicationContext()).load(sliderItem.getImageUrl())
+                .apply(new RequestOptions()
+                        .centerCrop()
+                        .dontTransform()
+                        .format(DecodeFormat.PREFER_ARGB_8888))
+                .placeholder(R.mipmap.ic_launcher_foreground)
+                .error(R.mipmap.ic_launcher_foreground)
+                .dontAnimate()
+                .placeholder(R.drawable.ic_launcher_foreground)
                 .into(viewHolder.imageViewBackground);
+
+        viewHolder.imageViewBackground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewHolder.redirectLink(sliderItem.getRedirect_link());
+            }
+        });
     }
 
     @Override
@@ -83,6 +102,12 @@ public class SliderAdapter extends SliderViewAdapter<SliderAdapter.SliderAdapter
 
             imageViewBackground = itemView.findViewById(R.id.image_main);
             this.itemView = itemView;
+        }
+
+        private void redirectLink(String url){
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            context.startActivity(intent);
         }
     }
 }
