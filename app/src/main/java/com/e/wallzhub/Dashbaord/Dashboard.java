@@ -18,6 +18,9 @@ import com.e.wallzhub.Constants.Constants;
 import com.e.wallzhub.Constants.Models.Collection;
 import com.e.wallzhub.Fragments.FragmentParent;
 import com.e.wallzhub.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,12 +35,18 @@ public class Dashboard extends AppCompatActivity {
     public static Toolbar toolbar;
     private FragmentParent fragmentParent;
     private ProgressBar mProgressBar;
+    private AdView mAdView;
     public static List<Collection> collectionsMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+
+        MobileAds.initialize(this, getString(R.string.appid));
+        mAdView =(AdView) findViewById(R.id.adview);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         collectionsMain = new ArrayList<>();
 

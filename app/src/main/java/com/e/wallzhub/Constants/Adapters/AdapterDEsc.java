@@ -1,6 +1,5 @@
 package com.e.wallzhub.Constants.Adapters;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -26,19 +25,22 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
+public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
     private List<ImageModel> imageModels;
     private Context context;
+    private String collection;
 
-    public Adapter(List<ImageModel> imageModels, Context context) {
+
+    public AdapterDEsc(List<ImageModel> imageModels, Context context, String collection) {
         this.imageModels = imageModels;
         this.context = context;
+        this.collection = collection;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_main, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_desc, parent, false);
         context = parent.getContext();
         return new ViewHolder(view);
     }
@@ -64,12 +66,15 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             public void onClick(View v) {
                 Intent intent = new Intent(context, ImageDesc.class);
                 intent.putExtra("src", imageModels.get(position).getSrc().toString());
-                intent.putExtra("collection", imageModels.get(position).getId());
+                intent.putExtra("collection", collection);
 
                 Pair<View, String> p1 = Pair.create((View) holder.mImageView, "image");
 
                 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
                 v.getContext().startActivity(intent, options.toBundle());
+                //finishing activity
+                ((Activity)context).finish();
+
             }
         });
 

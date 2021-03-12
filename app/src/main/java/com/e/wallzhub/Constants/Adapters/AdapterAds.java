@@ -1,17 +1,24 @@
 package com.e.wallzhub.Constants.Adapters;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.Fragments.FragmentChild;
+import com.e.wallzhub.ImageDesc;
 import com.e.wallzhub.R;
 import com.google.android.gms.ads.AdView;
 
@@ -24,13 +31,14 @@ import java.util.List;
 public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Object> imageModels;
     private Context context;
+    private String title;
     private static final int ITEM_TYPE_COUNTRY = 0;
     private static final int ITEM_TYPE_BANNER_AD = 1;
 
-
-    public AdapterAds(ArrayList<Object> imageModels, Context context) {
+    public AdapterAds(ArrayList<Object> imageModels, Context context, String title) {
         this.imageModels = imageModels;
         this.context = context;
+        this.title = title;
     }
 
     @NonNull
@@ -107,6 +115,21 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+
+                    viewHolderMain.mImageView.setOnClickListener(new View.OnClickListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(context, ImageDesc.class);
+                            intent.putExtra("src", imageModel.getSrc().toString());
+                            intent.putExtra("collection", title);
+
+                            Pair<View, String> p1 = Pair.create((View) viewHolderMain.mImageView, "image");
+
+                            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
+                            v.getContext().startActivity(intent, options.toBundle());
+                        }
+                    });
                 }
                 break;
         }

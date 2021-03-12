@@ -4,15 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@android:color/white"
+    android:orientation="vertical"
     tools:context=".Dashbaord.Dashboard">
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="4dp"
-        android:indeterminate="true"/>
+        android:indeterminate="true" />
     <!--Toolbar-->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar.main"
@@ -21,15 +22,43 @@
         android:background="@android:color/white"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/Theme.GuidelinesCompat.Light.ColoredToolbar"
-        app:titleMarginStart="12dp"
         app:title="@string/app_name"
+        app:titleMarginStart="12dp"
         app:titleTextAppearance="?textAppearanceHeadline5"
         app:titleTextColor="@color/secondaryColor" />
 
-    <fragment
+    <com.smarteist.autoimageslider.SliderView
+        android:id="@+id/imageSlider.one"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="64dp"
+        app:sliderAnimationDuration="600"
+        app:sliderAutoCycleDirection="back_and_forth"
+        app:sliderAutoCycleEnabled="true"
+        app:sliderIndicatorAnimationDuration="600"
+        app:sliderIndicatorGravity="center_horizontal|bottom"
+        app:sliderIndicatorMargin="15dp"
+        app:sliderIndicatorOrientation="horizontal"
+        app:sliderIndicatorPadding="3dp"
+        app:sliderIndicatorRadius="2dp"
+        app:sliderIndicatorSelectedColor="#5A5A5A"
+        app:sliderIndicatorUnselectedColor="#FFF"
+        app:sliderScrollTimeInSec="1"
+        app:sliderStartAutoCycle="true" />
+
+    <fragment
         android:id="@+id/fragmentParent"
-        android:name="com.e.wallzhub.Fragments.FragmentParent"/>
+        android:layout_weight="1"
+        android:name="com.e.wallzhub.Fragments.FragmentParent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+    <com.google.android.gms.ads.AdView
+        android:layout_marginTop="8dp"
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner"/>
 
 </LinearLayout>

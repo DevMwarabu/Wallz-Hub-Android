@@ -79,4 +79,7 @@ dependencies {
     //colors
     implementation 'androidx.palette:palette:1.0.0'
 
+    //downloader
+    implementation 'com.github.kk121:File-Loader:1.6'
+
 }

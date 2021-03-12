@@ -65,15 +65,15 @@ public class FragmentChild extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_child, container, false);
+        //getting bandle arguments
+        Bundle bundle = getArguments();
+        title = bundle.getString("title");
 
         initAdMobAdsSDK();
 
         imageModels = new ArrayList<>();
 
-        adapter = new AdapterAds(mListItems, getContext());
-        //getting bandle arguments
-        Bundle bundle = getArguments();
-        title = bundle.getString("title");
+        adapter = new AdapterAds(mListItems, getContext(),title);
 
         mRecyclerView = mView.findViewById(R.id.recycler_main);
         mSwipeRefreshLayout = mView.findViewById(R.id.swipe_main);

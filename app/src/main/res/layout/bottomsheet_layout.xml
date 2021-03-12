@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:cardUseCompatPadding="true"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            app:fontFamily="@font/bold"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:text="Download"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            app:fontFamily="@font/light"
+            android:textAppearance="?textAppearanceBody1"
+            android:text="choose your preferred size below to download"/>
+        <RadioGroup
+            android:id="@+id/radio.group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/radio.original"
+                android:textColor="@android:color/black"
+                android:textAppearance="?textAppearanceBody2"
+                android:fontFamily="@font/bold"
+                android:text="Original (2946 x 3682)"/>
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/radio.large"
+                android:textColor="@android:color/black"
+                android:textAppearance="?textAppearanceBody2"
+                android:fontFamily="@font/bold"
+                android:text="Large (1920 x 2399)"/>
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/radio.medium"
+                android:textColor="@android:color/black"
+                android:textAppearance="?textAppearanceBody2"
+                android:fontFamily="@font/bold"
+                android:text="Medium (1280 x 1599)"/>
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/radio.small"
+                android:textColor="@android:color/black"
+                android:textAppearance="?textAppearanceBody2"
+                android:fontFamily="@font/bold"
+                android:text="Small (640 x 799)"/>
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/radio.custom"
+                android:textColor="@android:color/black"
+                android:textAppearance="?textAppearanceBody2"
+                android:fontFamily="@font/bold"
+                android:text="Custom Size"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_marginRight="4dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@drawable/shape_outline_minor"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/edt.width"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:backgroundTint="@android:color/white"
+                        android:textSize="20sp"
+                        android:hint="width"
+                        android:maxLength="4"
+                        android:textColor="@android:color/black"
+                        android:inputType="number"
+                        android:paddingLeft="8dp"
+                        android:textColorHint="@color/colorHelper" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@drawable/shape_outline_minor"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/edt.height"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:backgroundTint="@android:color/white"
+                        android:textSize="20sp"
+                        android:hint="height"
+                        android:maxLength="4"
+                        android:textColor="@android:color/black"
+                        android:inputType="number"
+                        android:paddingLeft="8dp"
+                        android:textColorHint="@color/colorHelper" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </RadioGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn.download.bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/black"
+            android:text="free download"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:rippleColor="@color/colorHelper" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
