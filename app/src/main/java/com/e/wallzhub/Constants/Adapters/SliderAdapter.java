@@ -69,7 +69,7 @@ public class SliderAdapter extends SliderViewAdapter<SliderAdapter.SliderAdapter
         //setting values
         Glide.with(context.getApplicationContext()).load(sliderItem.getImageUrl())
                 .apply(new RequestOptions()
-                        .centerCrop()
+                        .fitCenter()
                         .dontTransform()
                         .format(DecodeFormat.PREFER_ARGB_8888))
                 .placeholder(R.mipmap.ic_launcher_foreground)

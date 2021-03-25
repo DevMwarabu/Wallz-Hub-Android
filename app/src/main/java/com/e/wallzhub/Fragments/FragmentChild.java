@@ -38,6 +38,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +59,8 @@ public class FragmentChild extends Fragment {
     private List<ImageModel> imageModels;
     public static final int ITEMS_PER_AD = 7;
     private ArrayList<Object> mListItems = new ArrayList<>();
+    int page = 0;
+    private FloatingActionButton mNext,mPrev;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,6 +79,8 @@ public class FragmentChild extends Fragment {
 
         mRecyclerView = mView.findViewById(R.id.recycler_main);
         mSwipeRefreshLayout = mView.findViewById(R.id.swipe_main);
+        mPrev = mView.findViewById(R.id.float_prev);
+        mNext = mView.findViewById(R.id.float_next);
 
 
 
@@ -102,7 +107,7 @@ public class FragmentChild extends Fragment {
                 if (title.equals("All")) {
                     getData();
                 } else {
-                    getData(title + "&locale=en-US&per_page=24&page=1");
+                    getData(title + "&locale=en-US&per_page=80page=1");
                 }
             }
         });
@@ -116,19 +121,136 @@ public class FragmentChild extends Fragment {
                 if (title.equals("All")) {
                     getData();
                 } else {
-                    getData(title + "&locale=en-US&per_page=24&page=1");
+                    getData(title + "&locale=en-US&per_page=80&page=1");
                 }
 
             }
         });
         loadBannerAds();
 
+        //clicks
+        mPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buttonPrevClicks(page);
+            }
+        });
+        mNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buttonNextClicks(page);
+            }
+        });
+
+
 
         return mView;
     }
 
+    private void buttonNextClicks(int page){
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                adapter.clear();
+                adapter.addAll(imageModels);
+                //loading
+                if (title.equals("All")) {
+                    getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page="+(page+1));
+                } else {
+                    getData(title + "&locale=en-US&per_page=80&page="+(page+1));
+                }
+
+            }
+        });
+    }
+
+    private void buttonPrevClicks(int page){
+        if (page>1) {
+            mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    adapter.clear();
+                    adapter.addAll(imageModels);
+                    //loading
+                    if (title.equals("All")) {
+                        getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page=" + (page - 1));
+                    } else {
+                        getData(title + "&locale=en-US&per_page=80&page=" + (page - 1));
+                    }
+
+                }
+            });
+        }
+    }
+
     private void getData() {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.baseUrl, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Dashboard.toolbar.setSubtitle("Total result " + response.getString("total_results"));
+                    Log.i("res_beer", "[" + response + "]");
+
+                    JSONArray jsonArray = response.getJSONArray("photos");
+
+                    if (shuffleJsonArray(jsonArray).length() > 0) {
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                            String photographer = jsonObject.getString("photographer");
+                            String photographer_url = jsonObject.getString("photographer_url");
+                            String id = jsonObject.getString("id");
+                            JSONObject src = jsonObject.getJSONObject("src");
+
+                            //adding to list
+                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src);
+                            imageModels.add(imageModel);
+
+                            //add to list
+                            mListItems.add(imageModel);
+                            //notifyadapter changes
+                            mRecyclerView.setAdapter(adapter);
+
+
+                        }
+                        adapter.notifyDataSetChanged();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    } else {
+                        //nothing found
+
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("res_beer", "[" + e.getMessage() + "]");
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("res_beer", "[" + error.getMessage() + "]");
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("authorization", Constants.api_key);
+                map.put("x-rapidapi-key", "d498088a25msheae6bb5b8a6fc9fp1c3886jsn5cef9e372445");
+                map.put("x-rapidapi-host", "PexelsdimasV1.p.rapidapi.com");
+                return map;
+            }
+        };
+        //creating a request queue
+        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+        //adding the string request to request queue
+        requestQueue.add(jsonObjectRequest);
+
+    }
+    private void getDataNext(String url) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {

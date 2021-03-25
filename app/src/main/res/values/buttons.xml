@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="icons">
+        <item>@drawable/ic_home</item>
+        <item>@drawable/ic_rating</item>
+        <item>@drawable/ic_share</item>
+        <item>@drawable/ic_more</item>
+        <item>@drawable/ic_order</item>
+    </array>
+    <array name="colors">
+        <item>@android:color/holo_blue_light</item>
+        <item>@android:color/holo_green_dark</item>
+        <item>@android:color/holo_red_light</item>
+        <item>@android:color/holo_purple</item>
+        <item>@android:color/holo_orange_light</item>
+    </array>
+
+</resources>

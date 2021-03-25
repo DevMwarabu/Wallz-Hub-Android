@@ -7,15 +7,53 @@
     app:cardElevation="2dp"
     app:cardCornerRadius="4dp"
     app:cardUseCompatPadding="true">
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="240dp"
             android:id="@+id/image.main"
+            android:layout_width="0dp"
+            android:layout_height="240dp"
             android:scaleType="centerCrop"
-            android:transitionName="image"/>
-    </LinearLayout>
+            android:transitionName="image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:clickable="true"
+            style="?selectableItemBackground"
+            android:id="@+id/linear.main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/image.main"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image.profile"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@color/colorHelper"
+                android:layout_gravity="center"
+                app:civ_border_color="@android:color/white"
+                app:civ_border_width="1dp" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tv.photographer"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="8dp"
+                android:textAppearance="?textAppearanceBody1"
+                android:textColor="@android:color/white"
+                app:fontFamily="@font/medium" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

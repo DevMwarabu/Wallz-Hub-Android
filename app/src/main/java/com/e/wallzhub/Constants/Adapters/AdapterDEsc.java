@@ -75,7 +75,7 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
                 Pair<View, String> p1 = Pair.create((View) holder.mImageView, "image");
 
                 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
-                v.getContext().startActivity(intent, options.toBundle());
+                v.getContext().startActivity(intent);
                 //finishing activity
                 ((Activity) context).finish();
 
