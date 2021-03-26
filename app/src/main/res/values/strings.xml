@@ -11,5 +11,12 @@
     <string name="banner">ca-app-pub-3181071576273254/9252230334</string>
     <string name="interstitial">ca-app-pub-3181071576273254/1997939734</string>
 
+
+    <string name="fbinterstitila">283665269779781_284232189723089</string>
+
+
+    <string name="facebook_app_id">283665269779781</string>
+    <string name="fb_login_protocol_scheme">fb283665269779781</string>
+
     <string name="playstore_link">https://play.google.com/store/apps/details?id=com.e.wallzhub</string>
 </resources>

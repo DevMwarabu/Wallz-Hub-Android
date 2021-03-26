@@ -10,7 +10,7 @@ android {
         applicationId "com.e.wallzhub"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 1
+        versionCode 3
         versionName "1.0"
         multiDexEnabled true
 
@@ -87,5 +87,12 @@ dependencies {
 
     //downloader
     implementation 'com.github.kk121:File-Loader:1.6'
+
+    //facebook sdk
+    implementation 'com.facebook.android:facebook-android-sdk:[5,6)'
+
+    //faceboock ads dep
+    implementation 'com.facebook.android:audience-network-sdk:5.+'
+
 
 }

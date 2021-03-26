@@ -29,12 +29,16 @@ import com.e.wallzhub.Constants.Models.Collection;
 import com.e.wallzhub.Fragments.FragmentParent;
 import com.e.wallzhub.ImageDesc;
 import com.e.wallzhub.R;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AudienceNetworkAds;
+import com.facebook.ads.InterstitialAd;
+import com.facebook.ads.InterstitialAdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.smarteist.autoimageslider.SliderAnimations;
 import com.smarteist.autoimageslider.SliderView;
@@ -54,17 +58,20 @@ public class Dashboard extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private AdView mAdView;
     public static List<Collection> collectionsMain;
-    private InterstitialAd mInterstitialAd;
     private AdRequest adRequest;
     private SliderView sliderView;
-
+    private InterstitialAd mInterstitialAd;
     private SliderAdapter adapter;
     private List<Advert> adverts;
+    private String TAG = "Changes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+        //facebook sdk init
+        AudienceNetworkAds.initialize(this);
+        mInterstitialAd = new InterstitialAd(this, getResources().getString(R.string.fbinterstitila));
 
         MobileAds.initialize(this, getString(R.string.appid));
         mAdView =(AdView) findViewById(R.id.adview);
@@ -209,48 +216,52 @@ public class Dashboard extends AppCompatActivity {
     }
 
     public void InterstitialAdmob() {
-        InterstitialAd.load(Dashboard.this,getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
+        InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
-            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                // The mInterstitialAd reference will be null until
-                // an ad is loaded.
-                mInterstitialAd = interstitialAd;
-                mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
-
-                    @Override
-                    public void onAdDismissedFullScreenContent() {
-                        super.onAdDismissedFullScreenContent();
-                        mInterstitialAd=null;
-
-                    }
-
-                    @Override
-                    public void onAdFailedToShowFullScreenContent(com.google.android.gms.ads.AdError adError) {
-                        super.onAdFailedToShowFullScreenContent(adError);
-                        mInterstitialAd = null;
-                        /// perform your action here when ad will not load
-                    }
-
-                    @Override
-                    public void onAdShowedFullScreenContent() {
-                        super.onAdShowedFullScreenContent();
-                        mInterstitialAd = null;
-
-                    }
-                });
-
+            public void onInterstitialDisplayed(Ad ad) {
+                // Interstitial ad displayed callback
+                Log.e(TAG, "Interstitial ad displayed.");
             }
 
             @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                // Handle the error
-                mInterstitialAd = null;
-
-
+            public void onInterstitialDismissed(Ad ad) {
+                // Interstitial dismissed callback
+                Log.e(TAG, "Interstitial ad dismissed.");
             }
 
-        });
+            @Override
+            public void onError(Ad ad, AdError adError) {
+                // Ad error callback
+                Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
+            }
 
+            @Override
+            public void onAdLoaded(Ad ad) {
+                // Interstitial ad is loaded and ready to be displayed
+                Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
+                // Show the ad
+                mInterstitialAd.show();
+            }
+
+            @Override
+            public void onAdClicked(Ad ad) {
+                // Ad clicked callback
+                Log.d(TAG, "Interstitial ad clicked!");
+            }
+
+            @Override
+            public void onLoggingImpression(Ad ad) {
+                // Ad impression logged callback
+                Log.d(TAG, "Interstitial ad impression logged!");
+            }
+        };
+
+        // For auto play video ads, it's recommended to load the ad
+        // at least 30 seconds before it is shown
+        mInterstitialAd.loadAd(
+                mInterstitialAd.buildLoadAdConfig()
+                        .withAdListener(interstitialAdListener)
+                        .build());
     }
 
     @Override
@@ -276,7 +287,7 @@ public class Dashboard extends AppCompatActivity {
         switch (r){
             case R.id.nav_share:
                 if (mInterstitialAd!=null){
-                    mInterstitialAd.show(Dashboard.this);
+                    mInterstitialAd.show();
                     InterstitialAdmob();
                 }
                 Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -288,14 +299,14 @@ public class Dashboard extends AppCompatActivity {
                 break;
             case R.id.nav_update:
                 if (mInterstitialAd!=null){
-                    mInterstitialAd.show(Dashboard.this);
+                    mInterstitialAd.show();
                     InterstitialAdmob();
                 }
                 openPlayStore();
                 break;
             case R.id.nav_more:
                 if (mInterstitialAd!=null){
-                    mInterstitialAd.show(Dashboard.this);
+                    mInterstitialAd.show();
                     InterstitialAdmob();
                 }
                 openDeveloperStore();
@@ -338,7 +349,7 @@ public class Dashboard extends AppCompatActivity {
     private void openSocial(String url){
 
         if (mInterstitialAd!=null){
-            mInterstitialAd.show(Dashboard.this);
+            mInterstitialAd.show();
             InterstitialAdmob();
         }
         Uri uri = Uri.parse(url); // missing 'http://' will cause crashed

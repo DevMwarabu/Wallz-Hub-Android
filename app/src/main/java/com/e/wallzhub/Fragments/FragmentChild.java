@@ -148,40 +148,30 @@ public class FragmentChild extends Fragment {
     }
 
     private void buttonNextClicks(int page){
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                adapter.clear();
-                adapter.addAll(imageModels);
-                //loading
-                if (title.equals("All")) {
-                    getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page="+(page+1));
-                } else {
-                    getData(title + "&locale=en-US&per_page=80&page="+(page+1));
-                }
-
-            }
-        });
+        mSwipeRefreshLayout.setRefreshing(true);
+        adapter.clear();
+        adapter.addAll(imageModels);
+        //loading
+        if (title.equals("All")) {
+            getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page="+(page+1));
+        } else {
+            getData(title + "&locale=en-US&per_page=80&page="+(page+1));
+        }
     }
 
     private void buttonPrevClicks(int page){
-        if (page>1) {
-            mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    adapter.clear();
-                    adapter.addAll(imageModels);
-                    //loading
-                    if (title.equals("All")) {
-                        getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page=" + (page - 1));
-                    } else {
-                        getData(title + "&locale=en-US&per_page=80&page=" + (page - 1));
-                    }
-
-                }
-            });
+        mSwipeRefreshLayout.setRefreshing(true);
+        adapter.clear();
+        adapter.addAll(imageModels);
+        //loading
+        if (title.equals("All")) {
+            getData();
+        } else {
+            getData(title + "&locale=en-US&per_page=80&page=1");
         }
     }
+
+    //https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page=1
 
     private void getData() {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.baseUrl, null, new Response.Listener<JSONObject>() {
