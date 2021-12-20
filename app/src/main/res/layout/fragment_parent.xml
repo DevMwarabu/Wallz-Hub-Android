@@ -1,40 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context=".Fragments.FragmentParent">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout.main"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tablayout.main"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout.main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            app:tabGravity="fill"
-            app:tabIconTint="@color/bottom_navigation_colors"
-            app:tabIndicatorColor="@color/secondaryColor"
-            app:tabIndicatorFullWidth="false"
-            app:tabIndicatorGravity="bottom"
-            app:tabIndicatorHeight="1dp"
-            app:tabMode="scrollable"
-            app:tabTextAppearance="?textAppearanceBody1"
-            app:tabRippleColor="@color/primaryLightColor"
-            app:tabSelectedTextColor="@color/bottom_navigation_colors" />
+            android:fitsSystemWindows="true"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/htab_collapse_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="288dp"
+                android:fitsSystemWindows="true"
+                app:contentScrim="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                app:titleEnabled="false">
 
-</LinearLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:fitsSystemWindows="true"
+                    app:layout_collapseMode="parallax"
+                    android:layout_marginBottom="?attr/actionBarSize"
+                    android:layout_height="match_parent">
+
+                    <com.smarteist.autoimageslider.SliderView
+                        android:id="@+id/imageSlider.one"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:sliderAnimationDuration="600"
+                        app:sliderAutoCycleDirection="back_and_forth"
+                        app:sliderAutoCycleEnabled="true"
+                        android:scrollIndicators="none"
+                        app:sliderIndicatorEnabled="false"
+                        app:sliderScrollTimeInSec="120"
+                        app:sliderStartAutoCycle="true" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginLeft="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginRight="12dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/imageSlider.one"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/imageSlider.one"
+                        android:orientation="horizontal">
+
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            app:strokeWidth="0.5dp"
+                            app:strokeColor="@android:color/darker_gray"
+                            app:cardUseCompatPadding="true"
+                            app:cardElevation="0dp"
+                            android:layout_gravity="center"
+                            app:cardCornerRadius="24dp"
+                            app:cardBackgroundColor="@android:color/black"
+                            app:layout_constraintBottom_toBottomOf="@+id/imageSlider.one"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/imageSlider.one">
+                            <androidx.appcompat.widget.SearchView
+                                android:id="@+id/searchview"
+                                android:layout_width="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_height="wrap_content"
+                                android:autofillHints="Search..."
+                                android:backgroundTint="@android:color/black"
+                                android:focusable="false"
+                                android:background="@android:color/black"
+                                app:defaultQueryHint="Search..."
+                                app:iconifiedByDefault="false"
+                                app:searchIcon="@drawable/ic_icons8_search" />
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/card.go"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            app:cardBackgroundColor="@android:color/white"
+                            app:cardCornerRadius="24dp"
+                            android:layout_marginLeft="8dp"
+                            app:cardElevation="0dp"
+                            app:cardUseCompatPadding="false"
+                            app:rippleColor="@android:color/darker_gray">
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="8dp"
+                                android:textColor="@android:color/black"
+                                app:fontFamily="@font/regular"
+                                android:textAppearance="?textAppearanceBody1"
+                                android:text="GO"/>
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar.main"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_gravity="top"
+                    android:layout_marginBottom="48dp"
+                    app:layout_collapseMode="pin"
+                    android:minHeight="?attr/actionBarSize"
+                    android:theme="@style/Theme.GuidelinesCompat.Light.ColoredToolbar"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:titleTextAppearance="?textAppearanceHeadline5"
+                    app:titleTextColor="@android:color/black">
+                    <androidx.appcompat.widget.ActionMenuView
+                        android:id="@+id/amvMenu"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="?attr/actionBarSize"/>
+                </com.google.android.material.appbar.MaterialToolbar>
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tablayout.main"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="bottom"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/white"
+                    app:tabGravity="fill"
+                    app:tabIconTint="@color/bottom_navigation_colors"
+                    app:tabIndicatorColor="@color/secondaryColor"
+                    app:tabIndicatorFullWidth="false"
+                    app:tabIndicatorGravity="bottom"
+                    app:tabIndicatorHeight="1dp"
+                    app:tabTextColor="@color/bottom_navigation_colors"
+                    app:tabMode="scrollable"
+                    app:tabTextAppearance="?textAppearanceBody1"
+                    app:tabRippleColor="@color/primaryLightColor"
+                    app:tabSelectedTextColor="@color/bottom_navigation_colors" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

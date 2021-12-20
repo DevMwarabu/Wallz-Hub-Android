@@ -40,6 +40,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@color/colorHelper"
+                android:visibility="gone"
                 android:layout_gravity="center"
                 app:civ_border_color="@android:color/white"
                 app:civ_border_width="1dp" />
@@ -55,5 +56,17 @@
                 android:textColor="@android:color/white"
                 app:fontFamily="@font/medium" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/image.video"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:src="@drawable/ic_icons8_circled_play"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/image.main"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

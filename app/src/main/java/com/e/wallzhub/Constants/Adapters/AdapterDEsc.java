@@ -1,9 +1,11 @@
 package com.e.wallzhub.Constants.Adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -16,7 +18,9 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.e.wallzhub.Constants.Models.ImageModel;
@@ -58,7 +62,7 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         try {
             holder.settingImage(imageModels.get(position).getSrc());
         } catch (JSONException e) {
@@ -69,8 +73,14 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ImageDesc.class);
-                intent.putExtra("src", imageModels.get(position).getSrc().toString());
+                try {
+                    intent.putExtra("src", imageModels.get(position).getSrc().getString("original"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 intent.putExtra("collection", collection);
+                intent.putExtra("type", imageModels.get(position).getType());
+                intent.putExtra("id", imageModels.get(position).getId());
 
                 Pair<View, String> p1 = Pair.create((View) holder.mImageView, "image");
 
@@ -99,11 +109,21 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
         }
 
         private void settingImage(JSONObject src) throws JSONException {
-            Glide.with(context.getApplicationContext()).load(src.getString("medium"))
-                    .apply(new RequestOptions()
-                            .fitCenter()
-                            .format(DecodeFormat.PREFER_ARGB_8888)
-                            .override(Target.SIZE_ORIGINAL))
+            RequestOptions requestOptions = new RequestOptions()
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .skipMemoryCache(true)
+                    .centerCrop()
+                    .dontAnimate()
+                    .dontTransform()
+                    .placeholder(R.drawable.place_holder)
+                    .error(R.drawable.place_holder)
+                    .priority(Priority.IMMEDIATE)
+                    .encodeFormat(Bitmap.CompressFormat.PNG)
+                    .format(DecodeFormat.DEFAULT)
+                    .override(150, 200);
+            Glide.with(context.getApplicationContext())
+                    .load(src.getString("medium"))
+                    .apply(requestOptions)
                     .placeholder(R.mipmap.ic_launcher_foreground)
                     .error(R.mipmap.ic_launcher_foreground)
                     .into(mImageView);

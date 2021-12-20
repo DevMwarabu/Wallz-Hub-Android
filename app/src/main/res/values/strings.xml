@@ -3,16 +3,23 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-<!--    <string name="appid">ca-app-pub-3940256099942544~3347511713</string>-->
-<!--    <string name="banner">ca-app-pub-3940256099942544/6300978111</string>-->
-<!--    <string name="interstitial">ca-app-pub-3940256099942544/1033173712</string>-->
+    <string name="baranch_key" translatable="false">key_live_kc1F3ByHZnlB7joRnuf9Caadqrivla2P</string>
 
-    <string name="appid">ca-app-pub-3181071576273254~8427616711</string>
-    <string name="banner">ca-app-pub-3181071576273254/9252230334</string>
-    <string name="interstitial">ca-app-pub-3181071576273254/1997939734</string>
+    <!--    <string name="appid">ca-app-pub-3940256099942544~3347511713</string>-->
+    <!--    <string name="banner">ca-app-pub-3940256099942544/6300978111</string>-->
+    <!--    <string name="interstitial">ca-app-pub-3940256099942544/1033173712</string>-->
+    <!--    <string name="opener">ca-app-pub-3940256099942544/3419835294</string>-->
+
+    <string name="appid">ca-app-pub-3274947077653447~9408982007</string>
+    <string name="banner">ca-app-pub-3274947077653447/3414457286</string>
+    <string name="interstitial">ca-app-pub-3274947077653447/8227568752</string>
+    <string name="opener">ca-app-pub-3274947077653447/7162130607</string>
 
 
     <string name="fbinterstitila">283665269779781_284232189723089</string>
+
+    <!--    OneSignal-->
+    <string name="one_signal_app_id">2eb6b7b1-bac3-40eb-8b9e-c9ec06c4ba14</string>
 
 
     <string name="facebook_app_id">283665269779781</string>

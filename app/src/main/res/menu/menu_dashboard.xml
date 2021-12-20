@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/nav.instagram"
+        android:title="Instagram"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_icons8_instagram"/>
+    <item
+        android:id="@+id/nav.facebook"
+        android:title="Facebook"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_icons8_facebook"/>
+    <item
+        android:id="@+id/nav.twitter"
+        android:title="WhatsApp"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_icons8_twitter"/>
+    <item
+        android:id="@+id/nav.share"
+        android:title="Instagram"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_icons8_share"/>
+    <item
+        android:id="@+id/nav.policy"
+        android:title="Sahre"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_icons8_privacy_policy"/>
+
+</menu>

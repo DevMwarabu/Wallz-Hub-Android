@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'com.onesignal.androidsdk.onesignal-gradle-plugin'
 }
 
 android {
@@ -10,8 +11,8 @@ android {
         applicationId "com.e.wallzhub"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 3
-        versionName "1.0"
+        versionCode 6
+        versionName "1.0.1"
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -93,6 +94,20 @@ dependencies {
 
     //faceboock ads dep
     implementation 'com.facebook.android:audience-network-sdk:5.+'
+    //onesignal
+    implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'
+    implementation 'com.alimuzaffar.lib:pinentryedittext:1.3.10'
+
+    def lifecycle_version = "2.0.0"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    // Play core library
+    implementation "com.google.android.play:core:1.8.0"
+
+// optional material library to show the fallback rate us dialog
+    implementation "com.google.android.material:material:1.3.0-alpha02"
+
 
 
 }

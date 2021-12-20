@@ -3,6 +3,8 @@ package com.e.wallzhub.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -15,7 +17,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -35,16 +39,22 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.AdapterStatus;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +68,12 @@ public class FragmentChild extends Fragment {
     private AdapterAds adapter;
     private List<ImageModel> imageModels;
     public static final int ITEMS_PER_AD = 7;
+    private LinearLayout linearLayoutMainSecond;
+    private ConstraintLayout mLinearLayoutMain;
     private ArrayList<Object> mListItems = new ArrayList<>();
     int page = 0;
-    private FloatingActionButton mNext,mPrev;
+    private FloatingActionButton mNext, mPrev;
+    private InterstitialAd mInterstitialAd;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,23 +88,25 @@ public class FragmentChild extends Fragment {
 
         imageModels = new ArrayList<>();
 
-        adapter = new AdapterAds(mListItems, getContext(),title);
+        adapter = new AdapterAds(mListItems, getContext(), title,mInterstitialAd);
 
         mRecyclerView = mView.findViewById(R.id.recycler_main);
         mSwipeRefreshLayout = mView.findViewById(R.id.swipe_main);
         mPrev = mView.findViewById(R.id.float_prev);
         mNext = mView.findViewById(R.id.float_next);
-
-
-
-        //ADS
-        addAdMobBannerAds();
+        mLinearLayoutMain = mView.findViewById(R.id.linear_main_load);
+        linearLayoutMainSecond = mView.findViewById(R.id.linear_main_second);
 
         int mNoOfColumns = FragmentChild.Utility.calculateNoOfColumns(getContext(), 180);
 
         final LinearLayoutManager layoutManager = new GridLayoutManager(getContext(), mNoOfColumns, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setItemViewCacheSize(20);
+        mRecyclerView.setDrawingCacheEnabled(true);
+        mRecyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+
 
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.primaryColor,
@@ -107,7 +122,7 @@ public class FragmentChild extends Fragment {
                 if (title.equals("All")) {
                     getData();
                 } else {
-                    getData(title + "&locale=en-US&per_page=80page=1");
+                    getData(title + "&locale=en-US&per_page=15");
                 }
             }
         });
@@ -121,12 +136,11 @@ public class FragmentChild extends Fragment {
                 if (title.equals("All")) {
                     getData();
                 } else {
-                    getData(title + "&locale=en-US&per_page=80&page=1");
+                    getData(title + "&locale=en-US&per_page=15");
                 }
 
             }
         });
-        loadBannerAds();
 
         //clicks
         mPrev.setOnClickListener(new View.OnClickListener() {
@@ -143,23 +157,22 @@ public class FragmentChild extends Fragment {
         });
 
 
-
         return mView;
     }
 
-    private void buttonNextClicks(int page){
+    private void buttonNextClicks(int page) {
         mSwipeRefreshLayout.setRefreshing(true);
         adapter.clear();
         adapter.addAll(imageModels);
         //loading
         if (title.equals("All")) {
-            getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page="+(page+1));
+            getDataNext("https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=15&page=" + (page + 1));
         } else {
-            getData(title + "&locale=en-US&per_page=80&page="+(page+1));
+            getData(title + "&locale=en-US&per_page=15&page=" + (page + 1));
         }
     }
 
-    private void buttonPrevClicks(int page){
+    private void buttonPrevClicks(int page) {
         mSwipeRefreshLayout.setRefreshing(true);
         adapter.clear();
         adapter.addAll(imageModels);
@@ -167,21 +180,24 @@ public class FragmentChild extends Fragment {
         if (title.equals("All")) {
             getData();
         } else {
-            getData(title + "&locale=en-US&per_page=80&page=1");
+            getData(title + "&locale=en-US&per_page=15");
         }
     }
 
-    //https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=80&page=1
-
     private void getData() {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.baseUrl, null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.baseUrl_Collection+title + "&locale=en-US&per_page=80&page=1", null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     Dashboard.toolbar.setSubtitle("Total result " + response.getString("total_results"));
-                    Log.i("res_beer", "[" + response + "]");
+                    Log.i("res_data", "[" + response + "]");
 
                     JSONArray jsonArray = response.getJSONArray("photos");
+
+                    if (jsonArray.length() > 0) {
+
+                        Log.i("TAG", "onResponse: data loaded");
+                    }
 
                     if (shuffleJsonArray(jsonArray).length() > 0) {
 
@@ -194,18 +210,18 @@ public class FragmentChild extends Fragment {
                             JSONObject src = jsonObject.getJSONObject("src");
 
                             //adding to list
-                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src);
+                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-
                             //add to list
                             mListItems.add(imageModel);
-                            //notifyadapter changes
-                            mRecyclerView.setAdapter(adapter);
+
+
+                            if (i == (jsonArray.length()-1)){
+                                getVideoData(title+"&per_page=15");
+                            }
 
 
                         }
-                        adapter.notifyDataSetChanged();
-                        mSwipeRefreshLayout.setRefreshing(false);
                     } else {
                         //nothing found
 
@@ -239,6 +255,82 @@ public class FragmentChild extends Fragment {
         requestQueue.add(jsonObjectRequest);
 
     }
+
+    private void getVideoData(String title) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.videos+title, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Log.i("res_data", "[" + response + "]");
+
+                    JSONArray jsonArray = response.getJSONArray("videos");
+
+                    if (jsonArray.length() > 0) {
+
+                        Log.i("TAG", "onResponse: data loaded");
+                    }
+
+                    if (shuffleJsonArray(jsonArray).length() > 0) {
+                        linearLayoutMainSecond.setVisibility(View.GONE);
+                        mLinearLayoutMain.setVisibility(View.VISIBLE);
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                            String id = jsonObject.getString("id");
+                            JSONObject user = jsonObject.getJSONObject("user");
+                            JSONArray video_files = jsonObject.getJSONArray("video_files");
+                            JSONArray video_pictures = jsonObject.getJSONArray("video_pictures");
+                            //adding to lists
+                            imageModels.add(new ImageModel(user,video_files,video_pictures,id,1));
+
+                            //add to list
+                            mListItems.add(new ImageModel(user,video_files,video_pictures,id,1));
+                            //notifyadapter changes
+                            mRecyclerView.setAdapter(adapter);
+
+
+                            if (i == (jsonArray.length()-1)){
+                                Collections.shuffle(mListItems,new Random());
+                            }
+
+
+                        }
+                    }
+                    adapter.notifyItemRangeChanged(0,(mListItems.size()));
+                    adapter.setHasStableIds(true);
+                    mSwipeRefreshLayout.setRefreshing(false);
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("res_beer", "[" + e.getMessage() + "]");
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("res_beer", "[" + error.getMessage() + "]");
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("authorization", Constants.api_key);
+                map.put("x-rapidapi-key", "d498088a25msheae6bb5b8a6fc9fp1c3886jsn5cef9e372445");
+                map.put("x-rapidapi-host", "PexelsdimasV1.p.rapidapi.com");
+                return map;
+            }
+        };
+        //creating a request queue
+        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+        //adding the string request to request queue
+        requestQueue.add(jsonObjectRequest);
+
+    }
+
     private void getDataNext(String url) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -250,6 +342,8 @@ public class FragmentChild extends Fragment {
                     JSONArray jsonArray = response.getJSONArray("photos");
 
                     if (shuffleJsonArray(jsonArray).length() > 0) {
+                        linearLayoutMainSecond.setVisibility(View.GONE);
+                        mLinearLayoutMain.setVisibility(View.VISIBLE);
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -260,18 +354,19 @@ public class FragmentChild extends Fragment {
                             JSONObject src = jsonObject.getJSONObject("src");
 
                             //adding to list
-                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src);
+                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
 
                             //add to list
                             mListItems.add(imageModel);
-                            //notifyadapter changes
-                            mRecyclerView.setAdapter(adapter);
+
+
+                            if (i == (jsonArray.length()-1)){
+                                getVideoData(title+"&per_page=15&page="+(page+1));
+                            }
 
 
                         }
-                        adapter.notifyDataSetChanged();
-                        mSwipeRefreshLayout.setRefreshing(false);
                     } else {
                         //nothing found
 
@@ -316,7 +411,16 @@ public class FragmentChild extends Fragment {
                     Dashboard.toolbar.setSubtitle("Total result " + object.getString("total_results"));
 
                     JSONArray jsonArray = object.getJSONArray("photos");
+
+                    if (jsonArray.length() > 0) {
+
+                        Log.i("TAG", "onResponse: data loaded");
+                    }
+
+
                     if (shuffleJsonArray(jsonArray).length() > 0) {
+//                        linearLayoutMainSecond.setVisibility(View.GONE);
+//                        mLinearLayoutMain.setVisibility(View.VISIBLE);
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -327,18 +431,23 @@ public class FragmentChild extends Fragment {
                             JSONObject src = jsonObject.getJSONObject("src");
 
                             //adding to list
-                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src);
+                            ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
                             //notifyadapter changes
 
                             //add to list
                             mListItems.add(imageModel);
-                            mRecyclerView.setAdapter(adapter);
+                            //mRecyclerView.setAdapter(adapter);
+
+
+                            if (i == (jsonArray.length()-1)){
+                                getVideoData(title+"&per_page=80");
+                            }
 
 
                         }
-                        adapter.notifyDataSetChanged();
-                        mSwipeRefreshLayout.setRefreshing(false);
+//                        adapter.notifyDataSetChanged();
+//                        mSwipeRefreshLayout.setRefreshing(false);
                     } else {
                         //nothing found
 
@@ -392,9 +501,41 @@ public class FragmentChild extends Fragment {
     }
 
     private void initAdMobAdsSDK() {
+        //ADS
         MobileAds.initialize(getContext(), new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
+                Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
+                for (String adapterClass : statusMap.keySet()) {
+                    AdapterStatus status = statusMap.get(adapterClass);
+                    Log.d("MyApp", String.format(
+                            "Adapter name: %s, Description: %s, Latency: %d",
+                            adapterClass, status.getDescription(), status.getLatency()));
+                }
+
+                // Start loading ads here...
+                addAdMobBannerAds();
+                loadInterstitial();
+            }
+        });
+    }
+
+
+
+    private void loadInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        com.google.android.gms.ads.interstitial.InterstitialAd.load(getContext(), getResources().getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
+            @Override
+            public void onAdLoaded(@NonNull @NotNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
+                super.onAdLoaded(interstitialAd);
+                mInterstitialAd = interstitialAd;
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+                mInterstitialAd = null;
             }
         });
     }
@@ -415,16 +556,13 @@ public class FragmentChild extends Fragment {
         loadBannerAd(ITEMS_PER_AD);
     }
 
-    private void loadBannerAd(final int index)
-    {
-        if (index >= mListItems.size())
-        {
+    private void loadBannerAd(final int index) {
+        if (index >= mListItems.size()) {
             return;
         }
 
         Object item = mListItems.get(index);
-        if (!(item instanceof AdView))
-        {
+        if (!(item instanceof AdView)) {
             throw new ClassCastException("Expected item at index " + index + " to be a banner ad" + " ad.");
         }
 
@@ -432,11 +570,9 @@ public class FragmentChild extends Fragment {
 
         // Set an AdListener on the AdView to wait for the previous banner ad
         // to finish loading before loading the next ad in the items list.
-        adView.setAdListener(new AdListener()
-        {
+        adView.setAdListener(new AdListener() {
             @Override
-            public void onAdLoaded()
-            {
+            public void onAdLoaded() {
                 super.onAdLoaded();
                 // The previous banner ad loaded successfully, call this method again to
                 // load the next ad in the items list.
@@ -444,8 +580,7 @@ public class FragmentChild extends Fragment {
             }
 
             @Override
-            public void onAdFailedToLoad(int errorCode)
-            {
+            public void onAdFailedToLoad(int errorCode) {
                 // The previous banner ad failed to load. Call this method again to load
                 // the next ad in the items list.
                 Log.e("MainActivity", "The previous banner ad failed to load. Attempting to"
@@ -460,12 +595,9 @@ public class FragmentChild extends Fragment {
 
 
     @Override
-    public void onResume()
-    {
-        for (Object item : mListItems)
-        {
-            if (item instanceof AdView)
-            {
+    public void onResume() {
+        for (Object item : mListItems) {
+            if (item instanceof AdView) {
                 AdView adView = (AdView) item;
                 adView.resume();
             }
@@ -474,12 +606,9 @@ public class FragmentChild extends Fragment {
     }
 
     @Override
-    public void onPause()
-    {
-        for (Object item : mListItems)
-        {
-            if (item instanceof AdView)
-            {
+    public void onPause() {
+        for (Object item : mListItems) {
+            if (item instanceof AdView) {
                 AdView adView = (AdView) item;
                 adView.pause();
             }
@@ -488,12 +617,9 @@ public class FragmentChild extends Fragment {
     }
 
     @Override
-    public void onDestroy()
-    {
-        for (Object item : mListItems)
-        {
-            if (item instanceof AdView)
-            {
+    public void onDestroy() {
+        for (Object item : mListItems) {
+            if (item instanceof AdView) {
                 AdView adView = (AdView) item;
                 adView.destroy();
             }

@@ -72,18 +72,18 @@ public class SliderAdapter extends SliderViewAdapter<SliderAdapter.SliderAdapter
                         .fitCenter()
                         .dontTransform()
                         .format(DecodeFormat.PREFER_ARGB_8888))
-                .placeholder(R.mipmap.ic_launcher_foreground)
+                .placeholder(R.drawable.place_holder)
                 .error(R.mipmap.ic_launcher_foreground)
                 .dontAnimate()
-                .placeholder(R.drawable.ic_launcher_foreground)
+                .placeholder(R.drawable.place_holder)
                 .into(viewHolder.imageViewBackground);
 
-        viewHolder.imageViewBackground.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewHolder.redirectLink(sliderItem.getRedirect_link());
-            }
-        });
+//        viewHolder.imageViewBackground.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                viewHolder.redirectLink(sliderItem.getRedirect_link());
+//            }
+//        });
     }
 
     @Override

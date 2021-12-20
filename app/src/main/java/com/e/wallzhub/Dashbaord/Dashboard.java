@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,8 +12,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -26,6 +29,7 @@ import com.e.wallzhub.Constants.Constants;
 import com.e.wallzhub.Constants.Models.AboutModel;
 import com.e.wallzhub.Constants.Models.Advert;
 import com.e.wallzhub.Constants.Models.Collection;
+import com.e.wallzhub.Constants.Models.ImageModel;
 import com.e.wallzhub.Fragments.FragmentParent;
 import com.e.wallzhub.ImageDesc;
 import com.e.wallzhub.R;
@@ -39,117 +43,98 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.AdapterStatus;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.smarteist.autoimageslider.SliderAnimations;
 import com.smarteist.autoimageslider.SliderView;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
 public class Dashboard extends AppCompatActivity {
     public static Toolbar toolbar;
     private FragmentParent fragmentParent;
-    private ProgressBar mProgressBar;
     private AdView mAdView;
     public static List<Collection> collectionsMain;
-    private AdRequest adRequest;
-    private SliderView sliderView;
-    private InterstitialAd mInterstitialAd;
-    private SliderAdapter adapter;
-    private List<Advert> adverts;
     private String TAG = "Changes";
+    public static LinearLayout mLinearLayoutMain,linearLayoutMainSecond;
+    public static com.google.android.gms.ads.interstitial.InterstitialAd mInterstitialAdGoogle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        //facebook sdk init
-        AudienceNetworkAds.initialize(this);
-        mInterstitialAd = new InterstitialAd(this, getResources().getString(R.string.fbinterstitila));
 
-        MobileAds.initialize(this, getString(R.string.appid));
-        mAdView =(AdView) findViewById(R.id.adview);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        //ADS
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+                Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
+                for (String adapterClass : statusMap.keySet()) {
+                    AdapterStatus status = statusMap.get(adapterClass);
+                    Log.d("MyApp", String.format(
+                            "Adapter name: %s, Description: %s, Latency: %d",
+                            adapterClass, status.getDescription(), status.getLatency()));
+                }
+
+                // Start loading ads here...
+                loadBunnerAd();
+                loadInterstitial();
+            }
+        });
 
         collectionsMain = new ArrayList<>();
-        adverts = new ArrayList<>();
-        adapter = new SliderAdapter(this,adverts);
 
         fragmentParent = (FragmentParent) this.getSupportFragmentManager().findFragmentById(R.id.fragmentParent);
 
         toolbar = findViewById(R.id.toolbar_main);
-        mProgressBar = findViewById(R.id.progressBar);
-        sliderView = findViewById(R.id.imageSlider_one);
+        mLinearLayoutMain = findViewById(R.id.linear_main_load);
+        linearLayoutMainSecond = findViewById(R.id.linear_main_second);
 
         getSupportActionBar();
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
         toolbar.setTitle(getResources().getString(R.string.app_name));
 
-        //customization slideView
-        sliderView.setSliderTransformAnimation(SliderAnimations.FADETRANSFORMATION);
-        sliderView.setAutoCycleDirection(SliderView.AUTO_CYCLE_DIRECTION_RIGHT);
-        sliderView.setIndicatorSelectedColor(getResources().getColor(R.color.secondaryColor));
-        sliderView.setIndicatorUnselectedColor(getResources().getColor(R.color.colorHelper));
-        sliderView.setScrollTimeInSec(4);
-        sliderView.startAutoCycle();
 
-        loadSlides();
+        loadingCollections();
 
     }
 
-    private void loadSlides() {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.about_policy, null, new Response.Listener<JSONObject>() {
+    @SuppressLint("MissingPermission")
+    private void loadBunnerAd() {
+        mAdView = findViewById(R.id.adview);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
+    private void loadInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        com.google.android.gms.ads.interstitial.InterstitialAd.load(this, getResources().getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
             @Override
-            public void onResponse(JSONObject response) {
-
-                loadingCollections();
-                try {
-                    Log.i("res_beer", "[" + response + "]");
-
-                    JSONArray jsonArray = response.getJSONArray("slide_images");
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                        String title = jsonObject.getString("title");
-                        String redirect_link = jsonObject.getString("redirect_link");
-                        String imageUrl = jsonObject.getString("imageUrl");
-
-                        //adding to list
-                        Advert advert = new Advert(title,redirect_link,imageUrl);
-                        adverts.add(advert);
-                        //notifyadapter changes
-                        sliderView.setSliderAdapter(adapter, true);
-
-
-                    }
-                    adapter.notifyDataSetChanged();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.i("res_beer", "[" + e.getMessage() + "]");
-                }
-
+            public void onAdLoaded(@NonNull @NotNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
+                super.onAdLoaded(interstitialAd);
+                mInterstitialAdGoogle = interstitialAd;
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("res_beer", "[" + error.getMessage() + "]");
+            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+                mInterstitialAdGoogle = null;
             }
         });
-        //creating a request queue
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        //adding the string request to request queue
-        requestQueue.add(jsonObjectRequest);
-
     }
 
     private void loadingCollections(){
@@ -160,8 +145,10 @@ public class Dashboard extends AppCompatActivity {
                 Log.i("res_a", "[" + response + "]");
 
                 JSONArray collections = new JSONArray(response);
+                Log.i(TAG, "onResponse: dat"+response);
                 if (collections.length()>0) {
-                    mProgressBar.setVisibility(View.GONE);
+                    linearLayoutMainSecond.setVisibility(View.GONE);
+                    mLinearLayoutMain.setVisibility(View.VISIBLE);
 
                     fragmentParent.addPage("All");
                     //default colection
@@ -215,115 +202,15 @@ public class Dashboard extends AppCompatActivity {
         return array;
     }
 
-    public void InterstitialAdmob() {
-        InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
-            @Override
-            public void onInterstitialDisplayed(Ad ad) {
-                // Interstitial ad displayed callback
-                Log.e(TAG, "Interstitial ad displayed.");
-            }
-
-            @Override
-            public void onInterstitialDismissed(Ad ad) {
-                // Interstitial dismissed callback
-                Log.e(TAG, "Interstitial ad dismissed.");
-            }
-
-            @Override
-            public void onError(Ad ad, AdError adError) {
-                // Ad error callback
-                Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
-            }
-
-            @Override
-            public void onAdLoaded(Ad ad) {
-                // Interstitial ad is loaded and ready to be displayed
-                Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
-                // Show the ad
-                mInterstitialAd.show();
-            }
-
-            @Override
-            public void onAdClicked(Ad ad) {
-                // Ad clicked callback
-                Log.d(TAG, "Interstitial ad clicked!");
-            }
-
-            @Override
-            public void onLoggingImpression(Ad ad) {
-                // Ad impression logged callback
-                Log.d(TAG, "Interstitial ad impression logged!");
-            }
-        };
-
-        // For auto play video ads, it's recommended to load the ad
-        // at least 30 seconds before it is shown
-        mInterstitialAd.loadAd(
-                mInterstitialAd.buildLoadAdConfig()
-                        .withAdListener(interstitialAdListener)
-                        .build());
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        adRequest = new AdRequest.Builder().build();
-        InterstitialAdmob();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu,menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        menuClicks(item.getItemId());
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void menuClicks(int r){
-        switch (r){
-            case R.id.nav_share:
-                if (mInterstitialAd!=null){
-                    mInterstitialAd.show();
-                    InterstitialAdmob();
-                }
-                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
-                String shareBody = "Hi! Update your photos using Wallz Hub App, for more information please click this link: https://play.google.com/store/apps/details?id=com.e.wallzhub";
-                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Wallz Hub");
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-                startActivity(Intent.createChooser(sharingIntent, "Share via"));
-                break;
-            case R.id.nav_update:
-                if (mInterstitialAd!=null){
-                    mInterstitialAd.show();
-                    InterstitialAdmob();
-                }
-                openPlayStore();
-                break;
-            case R.id.nav_more:
-                if (mInterstitialAd!=null){
-                    mInterstitialAd.show();
-                    InterstitialAdmob();
-                }
-                openDeveloperStore();
-                break;
-            case R.id.nav_facebook:
-                openSocial("https://www.facebook.com/wallz.hub");
-                break;
-            case R.id.nav_instagram:
-                openSocial("https://www.instagram.com/wallz_hub/");
-                break;
-            case R.id.nav_twitter:
-                openSocial("https://www.twitter.com/wallzhub");
-                break;
-            case R.id.nav_about:
-                openAbout();
-                break;
-        }
     }
 
     private void openAbout(){
@@ -347,11 +234,6 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void openSocial(String url){
-
-        if (mInterstitialAd!=null){
-            mInterstitialAd.show();
-            InterstitialAdmob();
-        }
         Uri uri = Uri.parse(url); // missing 'http://' will cause crashed
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(intent);

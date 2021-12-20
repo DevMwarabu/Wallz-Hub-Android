@@ -45,7 +45,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         mLinearLayoutMain = findViewById(R.id.linear_loading);
         mlLinearLayoutNoInternet = findViewById(R.id.linear_no_internet);
-        loading();
+        //loading();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //loading next activity
+                Intent intent = new Intent(MainActivity.this, Dashboard.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        },2000);
         super.onStart();
     }
 
