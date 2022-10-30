@@ -41,8 +41,6 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,10 +60,8 @@ public class Searching extends AppCompatActivity {
     private String title;
     private AdapterAds adapter;
     private List<ImageModel> imageModels;
-    public static final int ITEMS_PER_AD = 7;
     private LinearLayout linearLayoutMainSecond;
     private ConstraintLayout mLinearLayoutMain;
-    private ArrayList<Object> mListItems = new ArrayList<>();
     int page = 0;
     private FloatingActionButton mNext, mPrev;
     private InterstitialAd mInterstitialAd;
@@ -90,14 +86,13 @@ public class Searching extends AppCompatActivity {
 
                 // Start loading ads here...
                 //ADS
-                addAdMobBannerAds();
                 loadInterstitial();
             }
         });
 
         imageModels = new ArrayList<>();
 
-        adapter = new AdapterAds(mListItems, this, title, mInterstitialAd);
+        adapter = new AdapterAds(imageModels, this, title, mInterstitialAd);
 
         mRecyclerView = findViewById(R.id.recycler_main);
         mSwipeRefreshLayout = findViewById(R.id.swipe_main);
@@ -230,8 +225,6 @@ public class Searching extends AppCompatActivity {
                             //adding to list
                             ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-                            //add to list
-                            mListItems.add(imageModel);
 
 
                             if (i == (jsonArray.length()-1)){
@@ -301,21 +294,18 @@ public class Searching extends AppCompatActivity {
                             JSONArray video_pictures = jsonObject.getJSONArray("video_pictures");
                             //adding to lists
                             imageModels.add(new ImageModel(user,video_files,video_pictures,id,1));
-
-                            //add to list
-                            mListItems.add(new ImageModel(user,video_files,video_pictures,id,1));
                             //notifyadapter changes
                             mRecyclerView.setAdapter(adapter);
 
 
                             if (i == (jsonArray.length()-1)){
-                                Collections.shuffle(mListItems,new Random());
+                                Collections.shuffle(imageModels,new Random());
                             }
 
 
                         }
                     }
-                    adapter.notifyItemRangeChanged(0,(mListItems.size()));
+                    adapter.notifyItemRangeChanged(0,(imageModels.size()));
                     adapter.setHasStableIds(true);
                     mSwipeRefreshLayout.setRefreshing(false);
 
@@ -374,9 +364,6 @@ public class Searching extends AppCompatActivity {
                             //adding to list
                             ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-
-                            //add to list
-                            mListItems.add(imageModel);
 
 
                             if (i == (jsonArray.length()-1)){
@@ -451,10 +438,6 @@ public class Searching extends AppCompatActivity {
                             //adding to list
                             ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-                            //notifyadapter changes
-
-                            //add to list
-                            mListItems.add(imageModel);
                             //mRecyclerView.setAdapter(adapter);
 
 
@@ -466,9 +449,6 @@ public class Searching extends AppCompatActivity {
                         }
 //                        adapter.notifyDataSetChanged();
 //                        mSwipeRefreshLayout.setRefreshing(false);
-                    } else {
-                        //nothing found
-
                     }
 
                 } catch (Exception e) {
@@ -518,107 +498,21 @@ public class Searching extends AppCompatActivity {
         return array;
     }
 
-    private void addAdMobBannerAds() {
-        for (int i = ITEMS_PER_AD; i <= mListItems.size(); i += ITEMS_PER_AD) {
-            final AdView adView = new AdView(this);
-            adView.setAdSize(AdSize.MEDIUM_RECTANGLE);
-            adView.setAdUnitId(getResources().getString(R.string.banner));
-            mListItems.add(i, adView);
-        }
-        loadBannerAds();
-    }
-
     private void loadInterstitial() {
         AdRequest adRequest = new AdRequest.Builder().build();
 
         com.google.android.gms.ads.interstitial.InterstitialAd.load(this, getResources().getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
             @Override
-            public void onAdLoaded(@NonNull @NotNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
+            public void onAdLoaded(@NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
                 super.onAdLoaded(interstitialAd);
                 mInterstitialAd = interstitialAd;
             }
 
             @Override
-            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
                 mInterstitialAd = null;
             }
         });
-    }
-
-    private void loadBannerAds() {
-        //Load the first banner ad in the items list (subsequent ads will be loaded automatically in sequence).
-        loadBannerAd(ITEMS_PER_AD);
-    }
-
-    private void loadBannerAd(final int index) {
-        if (index >= mListItems.size()) {
-            return;
-        }
-
-        Object item = mListItems.get(index);
-        if (!(item instanceof AdView)) {
-            throw new ClassCastException("Expected item at index " + index + " to be a banner ad" + " ad.");
-        }
-
-        final AdView adView = (AdView) item;
-
-        // Set an AdListener on the AdView to wait for the previous banner ad
-        // to finish loading before loading the next ad in the items list.
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                // The previous banner ad loaded successfully, call this method again to
-                // load the next ad in the items list.
-                loadBannerAd(index + ITEMS_PER_AD);
-            }
-
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                // The previous banner ad failed to load. Call this method again to load
-                // the next ad in the items list.
-                Log.e("MainActivity", "The previous banner ad failed to load. Attempting to"
-                        + " load the next banner ad in the items list.");
-                loadBannerAd(index + ITEMS_PER_AD);
-            }
-        });
-
-        // Load the banner ad.
-        adView.loadAd(new AdRequest.Builder().build());
-    }
-
-
-    @Override
-    public void onResume() {
-        for (Object item : mListItems) {
-            if (item instanceof AdView) {
-                AdView adView = (AdView) item;
-                adView.resume();
-            }
-        }
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        for (Object item : mListItems) {
-            if (item instanceof AdView) {
-                AdView adView = (AdView) item;
-                adView.pause();
-            }
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        for (Object item : mListItems) {
-            if (item instanceof AdView) {
-                AdView adView = (AdView) item;
-                adView.destroy();
-            }
-        }
-        super.onDestroy();
     }
 }

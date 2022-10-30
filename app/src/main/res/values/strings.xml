@@ -5,15 +5,15 @@
 
     <string name="baranch_key" translatable="false">key_live_kc1F3ByHZnlB7joRnuf9Caadqrivla2P</string>
 
-    <!--    <string name="appid">ca-app-pub-3940256099942544~3347511713</string>-->
-    <!--    <string name="banner">ca-app-pub-3940256099942544/6300978111</string>-->
-    <!--    <string name="interstitial">ca-app-pub-3940256099942544/1033173712</string>-->
-    <!--    <string name="opener">ca-app-pub-3940256099942544/3419835294</string>-->
+        <string name="appid">ca-app-pub-3940256099942544~3347511713</string>
+        <string name="banner">ca-app-pub-3940256099942544/6300978111</string>
+        <string name="interstitial">ca-app-pub-3940256099942544/1033173712</string>
+        <string name="opener">ca-app-pub-3940256099942544/3419835294</string>
 
-    <string name="appid">ca-app-pub-3274947077653447~9408982007</string>
-    <string name="banner">ca-app-pub-3274947077653447/3414457286</string>
-    <string name="interstitial">ca-app-pub-3274947077653447/8227568752</string>
-    <string name="opener">ca-app-pub-3274947077653447/7162130607</string>
+<!--    <string name="appid">ca-app-pub-6114771035544351~5739125881</string>-->
+<!--    <string name="banner">ca-app-pub-6114771035544351/6303583734</string>-->
+<!--    <string name="interstitial">ca-app-pub-6114771035544351/1051257058</string>-->
+<!--    <string name="opener">ca-app-pub-6114771035544351/6669064178</string>-->
 
 
     <string name="fbinterstitila">283665269779781_284232189723089</string>

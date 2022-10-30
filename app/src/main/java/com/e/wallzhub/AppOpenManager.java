@@ -25,7 +25,7 @@ import com.google.android.gms.ads.appopen.AppOpenAd;
  */
 public class AppOpenManager implements Application.ActivityLifecycleCallbacks, LifecycleObserver {
     private static final String LOG_TAG = "AppOpenManager";
-    private static final String AD_UNIT_ID = "ca-app-pub-3274947077653447/7162130607";
+    private static final String AD_UNIT_ID = "ca-app-pub-6114771035544351/6669064178";
     private AppOpenAd appOpenAd = null;
 
     private AppOpenAd.AppOpenAdLoadCallback loadCallback;

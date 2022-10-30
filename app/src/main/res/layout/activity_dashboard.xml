@@ -43,7 +43,6 @@
             android:layout_height="wrap_content"
             android:background="@android:color/white"
             android:minHeight="?attr/actionBarSize"
-            android:theme="@style/Theme.GuidelinesCompat.Light.ColoredToolbar"
             app:title="@string/app_name"
             app:titleMarginStart="12dp"
             app:titleTextAppearance="?textAppearanceHeadline5"

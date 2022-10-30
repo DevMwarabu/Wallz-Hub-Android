@@ -1,5 +1,6 @@
 package com.e.wallzhub.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -39,6 +40,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.AdapterStatus;
@@ -47,8 +49,6 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,10 +67,8 @@ public class FragmentChild extends Fragment {
     private String title;
     private AdapterAds adapter;
     private List<ImageModel> imageModels;
-    public static final int ITEMS_PER_AD = 7;
     private LinearLayout linearLayoutMainSecond;
     private ConstraintLayout mLinearLayoutMain;
-    private ArrayList<Object> mListItems = new ArrayList<>();
     int page = 0;
     private FloatingActionButton mNext, mPrev;
     private InterstitialAd mInterstitialAd;
@@ -84,11 +82,11 @@ public class FragmentChild extends Fragment {
         Bundle bundle = getArguments();
         title = bundle.getString("title");
 
-        initAdMobAdsSDK();
+        loadInterstitial();
 
         imageModels = new ArrayList<>();
 
-        adapter = new AdapterAds(mListItems, getContext(), title,mInterstitialAd);
+        adapter = new AdapterAds(imageModels, getContext(), title,mInterstitialAd);
 
         mRecyclerView = mView.findViewById(R.id.recycler_main);
         mSwipeRefreshLayout = mView.findViewById(R.id.swipe_main);
@@ -152,7 +150,25 @@ public class FragmentChild extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buttonNextClicks(page);
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            buttonNextClicks(page);
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    buttonNextClicks(page);
+                }
             }
         });
 
@@ -212,8 +228,6 @@ public class FragmentChild extends Fragment {
                             //adding to list
                             ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-                            //add to list
-                            mListItems.add(imageModel);
 
 
                             if (i == (jsonArray.length()-1)){
@@ -222,9 +236,6 @@ public class FragmentChild extends Fragment {
 
 
                         }
-                    } else {
-                        //nothing found
-
                     }
 
                 } catch (Exception e) {
@@ -283,21 +294,18 @@ public class FragmentChild extends Fragment {
                             JSONArray video_pictures = jsonObject.getJSONArray("video_pictures");
                             //adding to lists
                             imageModels.add(new ImageModel(user,video_files,video_pictures,id,1));
-
-                            //add to list
-                            mListItems.add(new ImageModel(user,video_files,video_pictures,id,1));
                             //notifyadapter changes
                             mRecyclerView.setAdapter(adapter);
 
 
                             if (i == (jsonArray.length()-1)){
-                                Collections.shuffle(mListItems,new Random());
+                                Collections.shuffle(imageModels,new Random());
                             }
 
 
                         }
                     }
-                    adapter.notifyItemRangeChanged(0,(mListItems.size()));
+                    adapter.notifyItemRangeChanged(0,(imageModels.size()));
                     adapter.setHasStableIds(true);
                     mSwipeRefreshLayout.setRefreshing(false);
 
@@ -356,9 +364,6 @@ public class FragmentChild extends Fragment {
                             //adding to list
                             ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-
-                            //add to list
-                            mListItems.add(imageModel);
 
 
                             if (i == (jsonArray.length()-1)){
@@ -433,10 +438,6 @@ public class FragmentChild extends Fragment {
                             //adding to list
                             ImageModel imageModel = new ImageModel(photographer, photographer_url, id, src,0);
                             imageModels.add(imageModel);
-                            //notifyadapter changes
-
-                            //add to list
-                            mListItems.add(imageModel);
                             //mRecyclerView.setAdapter(adapter);
 
 
@@ -500,131 +501,22 @@ public class FragmentChild extends Fragment {
         return array;
     }
 
-    private void initAdMobAdsSDK() {
-        //ADS
-        MobileAds.initialize(getContext(), new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-                Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
-                for (String adapterClass : statusMap.keySet()) {
-                    AdapterStatus status = statusMap.get(adapterClass);
-                    Log.d("MyApp", String.format(
-                            "Adapter name: %s, Description: %s, Latency: %d",
-                            adapterClass, status.getDescription(), status.getLatency()));
-                }
-
-                // Start loading ads here...
-                addAdMobBannerAds();
-                loadInterstitial();
-            }
-        });
-    }
-
-
-
     private void loadInterstitial() {
         AdRequest adRequest = new AdRequest.Builder().build();
 
         com.google.android.gms.ads.interstitial.InterstitialAd.load(getContext(), getResources().getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
             @Override
-            public void onAdLoaded(@NonNull @NotNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
+            public void onAdLoaded(@NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
                 super.onAdLoaded(interstitialAd);
                 mInterstitialAd = interstitialAd;
             }
 
             @Override
-            public void onAdFailedToLoad(@NonNull @NotNull LoadAdError loadAdError) {
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
                 mInterstitialAd = null;
             }
         });
-    }
-
-    private void addAdMobBannerAds() {
-        for (int i = ITEMS_PER_AD; i <= mListItems.size(); i += ITEMS_PER_AD) {
-            final AdView adView = new AdView(getContext());
-            adView.setAdSize(AdSize.MEDIUM_RECTANGLE);
-            adView.setAdUnitId(getResources().getString(R.string.banner));
-            mListItems.add(i, adView);
-        }
-
-        loadBannerAds();
-    }
-
-    private void loadBannerAds() {
-        //Load the first banner ad in the items list (subsequent ads will be loaded automatically in sequence).
-        loadBannerAd(ITEMS_PER_AD);
-    }
-
-    private void loadBannerAd(final int index) {
-        if (index >= mListItems.size()) {
-            return;
-        }
-
-        Object item = mListItems.get(index);
-        if (!(item instanceof AdView)) {
-            throw new ClassCastException("Expected item at index " + index + " to be a banner ad" + " ad.");
-        }
-
-        final AdView adView = (AdView) item;
-
-        // Set an AdListener on the AdView to wait for the previous banner ad
-        // to finish loading before loading the next ad in the items list.
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                // The previous banner ad loaded successfully, call this method again to
-                // load the next ad in the items list.
-                loadBannerAd(index + ITEMS_PER_AD);
-            }
-
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                // The previous banner ad failed to load. Call this method again to load
-                // the next ad in the items list.
-                Log.e("MainActivity", "The previous banner ad failed to load. Attempting to"
-                        + " load the next banner ad in the items list.");
-                loadBannerAd(index + ITEMS_PER_AD);
-            }
-        });
-
-        // Load the banner ad.
-        adView.loadAd(new AdRequest.Builder().build());
-    }
-
-
-    @Override
-    public void onResume() {
-        for (Object item : mListItems) {
-            if (item instanceof AdView) {
-                AdView adView = (AdView) item;
-                adView.resume();
-            }
-        }
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        for (Object item : mListItems) {
-            if (item instanceof AdView) {
-                AdView adView = (AdView) item;
-                adView.pause();
-            }
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        for (Object item : mListItems) {
-            if (item instanceof AdView) {
-                AdView adView = (AdView) item;
-                adView.destroy();
-            }
-        }
-        super.onDestroy();
     }
 
 

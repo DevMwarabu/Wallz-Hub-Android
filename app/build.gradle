@@ -4,14 +4,14 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 31
+    //buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.e.wallzhub"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 6
+        minSdkVersion 21
+        targetSdkVersion 31
+        versionCode 7
         versionName "1.0.1"
         multiDexEnabled true
 
@@ -37,26 +37,24 @@ android {
 }
 
 dependencies {
-
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+//    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     //material views
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.6.0'
 
     //imagecropping image
-    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
     //image zooming
-    implementation 'com.jsibbold:zoomage:1.2.0'
+    implementation 'com.jsibbold:zoomage:1.3.1'
     //ripple image
     implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
     //picasso images
@@ -65,18 +63,15 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.1.0@aar'
 
     //volley
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.android.volley:volley:1.1.1'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.android.volley:volley:1.2.1'
     //rounded imageView
     implementation 'com.makeramen:roundedimageview:2.3.0'
     //image slider
-    implementation 'com.github.smarteist:autoimageslider:1.3.9'
+//    implementation 'com.github.smarteist:autoimageslider:1.4.0'
 
     //ads
     implementation 'com.google.android.gms:play-services-ads:19.7.0'
-
-    //toolbar
-    implementation 'com.lucasurbas:guidelinescompattoolbar:1.0.0'
     //dialog updator
     implementation 'com.github.javiersantos:AppUpdater:2.7'
 
@@ -107,7 +102,7 @@ dependencies {
 
 // optional material library to show the fallback rate us dialog
     implementation "com.google.android.material:material:1.3.0-alpha02"
-
+    implementation 'androidx.work:work-runtime-ktx:2.7.0'
 
 
 }

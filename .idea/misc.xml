@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_searching.xml" value="0.17708333333333334" />
         <entry key="app/src/main/res/layout/activity_video_desc.xml" value="0.17708333333333334" />
+        <entry key="app/src/main/res/layout/banner_ad_row.xml" value="0.3307291666666667" />
         <entry key="app/src/main/res/layout/fragment_child.xml" value="0.17708333333333334" />
         <entry key="app/src/main/res/layout/fragment_parent.xml" value="0.25" />
         <entry key="app/src/main/res/layout/layout_desc.xml" value="0.5206349206349207" />
@@ -63,7 +64,7 @@
       </value>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

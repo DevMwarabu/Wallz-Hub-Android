@@ -24,42 +24,31 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.e.wallzhub.BuildConfig;
-import com.e.wallzhub.Constants.Adapters.SliderAdapter;
 import com.e.wallzhub.Constants.Adapters.ViewPagerAdapter;
-import com.e.wallzhub.Constants.Constants;
 import com.e.wallzhub.Constants.Models.Advert;
 import com.e.wallzhub.Dashbaord.AboutUs;
 import com.e.wallzhub.Dashbaord.Dashboard;
 import com.e.wallzhub.R;
 import com.e.wallzhub.Searching;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.tasks.Task;
-import com.smarteist.autoimageslider.SliderAnimations;
-import com.smarteist.autoimageslider.SliderView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
@@ -67,13 +56,12 @@ public class FragmentParent extends Fragment {
     private ViewPager mViewPager;
     private TabLayout tabLayout;
     private View mView;
-    private SliderView sliderView;
     private List<Advert> adverts;
-    private SliderAdapter sliderAdapter;
     private ViewPagerAdapter adapter;
     private Toolbar mToolbar;
     private ActionMenuView actionMenuView;
     private SearchView mSearchView;
+    private InterstitialAd mInterstitialAd;
     private CardView mGo;
     private ReviewManager reviewManager;
 
@@ -87,15 +75,15 @@ public class FragmentParent extends Fragment {
 
         adapter = new ViewPagerAdapter(getFragmentManager(), getContext());
         adverts = new ArrayList<>();
-        sliderAdapter = new SliderAdapter(getContext(), adverts);
 
         mViewPager = mView.findViewById(R.id.viewPager);
         tabLayout = mView.findViewById(R.id.tablayout_main);
-        sliderView = mView.findViewById(R.id.imageSlider_one);
         mToolbar = mView.findViewById(R.id.toolbar_main);
         mSearchView = mView.findViewById(R.id.searchview);
         mGo = mView.findViewById(R.id.card_go);
         actionMenuView = mView.findViewById(R.id.amvMenu);
+
+        loadInterstitial();
 
         setHasOptionsMenu(true);
 
@@ -107,13 +95,6 @@ public class FragmentParent extends Fragment {
 
         mViewPager.setAdapter(adapter);
         mViewPager.setOffscreenPageLimit(9);
-
-        //customization slideView
-        sliderView.setSliderTransformAnimation(SliderAnimations.FADETRANSFORMATION);
-        sliderView.setAutoCycleDirection(SliderView.AUTO_CYCLE_DIRECTION_RIGHT);
-        sliderView.setScrollTimeInSec(120);
-        sliderView.startAutoCycle();
-        sliderView.setIndicatorEnabled(false);
 
 
         actionMenuView.setOnMenuItemClickListener(new ActionMenuView.OnMenuItemClickListener() {
@@ -127,7 +108,7 @@ public class FragmentParent extends Fragment {
             public void onClick(View v) {
                 if (!TextUtils.isEmpty(mSearchView.getQuery().toString())) {
                     startActivity(new Intent(getContext(), Searching.class).putExtra("title", mSearchView.getQuery().toString()));
-                }else {
+                } else {
                     Toast.makeText(getContext(), "Enter something to search..", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -152,10 +133,30 @@ public class FragmentParent extends Fragment {
             }
         });
 
-        loadSlides();
+       // loadSlides();
 
 
         return mView;
+    }
+
+
+
+    private void loadInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        InterstitialAd.load(getContext(), getResources().getString(R.string.interstitial), adRequest, new InterstitialAdLoadCallback() {
+            @Override
+            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                super.onAdLoaded(interstitialAd);
+                mInterstitialAd = interstitialAd;
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+                mInterstitialAd = null;
+            }
+        });
     }
 
 
@@ -174,31 +175,161 @@ public class FragmentParent extends Fragment {
     private void menuClicks(int r) {
         switch (r) {
             case R.id.nav_share:
-                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
-                String shareBody = "Hi! Update your Gallery Photos using Wallz Hub App, for more information please click this link: https://play.google.com/store/apps/details?id=com.e.wallzhub";
-                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_name));
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-                startActivity(Intent.createChooser(sharingIntent, "Share via"));
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                            sharingIntent.setType("text/plain");
+                            String shareBody = "Hi! Update your Gallery Photos using Wallz Hub App, for more information please click this link: https://play.google.com/store/apps/details?id=com.e.wallzhub";
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_name));
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+                            startActivity(Intent.createChooser(sharingIntent, "Share via"));
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    sharingIntent.setType("text/plain");
+                    String shareBody = "Hi! Update your Gallery Photos using Wallz Hub App, for more information please click this link: https://play.google.com/store/apps/details?id=com.e.wallzhub";
+                    sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_name));
+                    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+                    startActivity(Intent.createChooser(sharingIntent, "Share via"));
+                }
                 break;
-            case R.id.nav_update:
-                showRateApp();
+            case R.id.nav_rate:
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            showRateApp();
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    showRateApp();
+                }
                 break;
             case R.id.nav_more:
-                openDeveloperStore();
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            openDeveloperStore();
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    openDeveloperStore();
+                }
                 break;
             case R.id.nav_facebook:
-                showRateApp();
-                //openSocial("https://www.facebook.com/wallz.hub");
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            openSocial("https://www.facebook.com/wallz.hub");
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    openSocial("https://www.facebook.com/wallz.hub");
+                }
                 break;
             case R.id.nav_instagram:
-                openSocial("https://www.instagram.com/wallz_hub/");
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            openSocial("https://www.instagram.com/wallz_hub/");
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    openSocial("https://www.instagram.com/wallz_hub/");
+                }
                 break;
             case R.id.nav_twitter:
-                openSocial("https://www.twitter.com/wallzhub");
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            openSocial("https://www.twitter.com/wallzhub");
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    openSocial("https://www.twitter.com/wallzhub");
+                }
                 break;
             case R.id.nav_policy:
-                openAbout();
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) getActivity());
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            openAbout();
+                            loadInterstitial();
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            loadInterstitial();
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    openAbout();
+                }
                 break;
         }
     }
@@ -208,36 +339,22 @@ public class FragmentParent extends Fragment {
     }
 
 
-
-
     private void openPlayStore() {
-        try
-        {
+        try {
             Intent rateIntent = rateIntentForUrl("market://details");
             startActivity(rateIntent);
-        }
-        catch (ActivityNotFoundException e)
-        {
+        } catch (ActivityNotFoundException e) {
             Intent rateIntent = rateIntentForUrl("https://play.google.com/store/apps/details");
             startActivity(rateIntent);
         }
-//        try {
-//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID)));
-//        } catch (android.content.ActivityNotFoundException anfe) {
-//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID)));
-//        }
     }
 
-    private Intent rateIntentForUrl(String url)
-    {
+    private Intent rateIntentForUrl(String url) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("%s?id=%s", url, getContext().getPackageName())));
         int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
-        if (Build.VERSION.SDK_INT >= 21)
-        {
+        if (Build.VERSION.SDK_INT >= 21) {
             flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-        }
-        else
-        {
+        } else {
             //noinspection deprecation
             flags |= Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
         }
@@ -298,67 +415,67 @@ public class FragmentParent extends Fragment {
         startActivity(intent);
     }
 
-    private void loadSlides() {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.baseUrl, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    Log.i("res_beer", "[" + response + "]");
-
-                    JSONArray jsonArray = response.getJSONArray("photos");
-
-                    if (shuffleJsonArray(jsonArray).length() > 0) {
-
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                            String photographer = jsonObject.getString("photographer");
-                            String photographer_url = jsonObject.getString("photographer_url");
-                            String id = jsonObject.getString("id");
-                            JSONObject src = jsonObject.getJSONObject("src");
-                            String imageUrl = src.getString("landscape");
-
-                            //adding to list
-                            Advert advert = new Advert(photographer, photographer_url, imageUrl);
-                            adverts.add(advert);
-                            //notifyadapter changes
-                            sliderView.setSliderAdapter(sliderAdapter, true);
-
-
-                        }
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        //nothing found
-
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.i("res_beer", "[" + e.getMessage() + "]");
-                }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("res_beer", "[" + error.getMessage() + "]");
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("authorization", Constants.api_key);
-                map.put("x-rapidapi-key", "d498088a25msheae6bb5b8a6fc9fp1c3886jsn5cef9e372445");
-                map.put("x-rapidapi-host", "PexelsdimasV1.p.rapidapi.com");
-                return map;
-            }
-        };
-        //creating a request queue
-        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
-        //adding the string request to request queue
-        requestQueue.add(jsonObjectRequest);
-
-    }
+//    private void loadSlides() {
+//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.baseUrl, null, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                try {
+//                    Log.i("res_beer", "[" + response + "]");
+//
+//                    JSONArray jsonArray = response.getJSONArray("photos");
+//
+//                    if (shuffleJsonArray(jsonArray).length() > 0) {
+//
+//                        for (int i = 0; i < jsonArray.length(); i++) {
+//                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+//
+//                            String photographer = jsonObject.getString("photographer");
+//                            String photographer_url = jsonObject.getString("photographer_url");
+//                            String id = jsonObject.getString("id");
+//                            JSONObject src = jsonObject.getJSONObject("src");
+//                            String imageUrl = src.getString("landscape");
+//
+//                            //adding to list
+//                            Advert advert = new Advert(photographer, photographer_url, imageUrl);
+//                            adverts.add(advert);
+//                            //notifyadapter changes
+//                            sliderView.setSliderAdapter(sliderAdapter, true);
+//
+//
+//                        }
+//                        adapter.notifyDataSetChanged();
+//                    } else {
+//                        //nothing found
+//
+//                    }
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Log.i("res_beer", "[" + e.getMessage() + "]");
+//                }
+//
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.i("res_beer", "[" + error.getMessage() + "]");
+//            }
+//        }) {
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> map = new HashMap<String, String>();
+//                map.put("authorization", Constants.api_key);
+//                map.put("x-rapidapi-key", "d498088a25msheae6bb5b8a6fc9fp1c3886jsn5cef9e372445");
+//                map.put("x-rapidapi-host", "PexelsdimasV1.p.rapidapi.com");
+//                return map;
+//            }
+//        };
+//        //creating a request queue
+//        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+//        //adding the string request to request queue
+//        requestQueue.add(jsonObjectRequest);
+//
+//    }
 
 
     public static JSONArray shuffleJsonArray(JSONArray array) throws JSONException {

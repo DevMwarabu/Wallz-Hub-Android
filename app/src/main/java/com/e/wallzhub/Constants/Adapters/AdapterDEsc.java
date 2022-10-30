@@ -72,6 +72,9 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
+                //finishing activity
+                ((Activity) context).finish();
+
                 Intent intent = new Intent(context, ImageDesc.class);
                 try {
                     intent.putExtra("src", imageModels.get(position).getSrc().getString("original"));
@@ -86,8 +89,6 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
 
                 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
                 v.getContext().startActivity(intent);
-                //finishing activity
-                ((Activity) context).finish();
 
             }
         });
@@ -110,17 +111,9 @@ public class AdapterDEsc extends RecyclerView.Adapter<AdapterDEsc.ViewHolder> {
 
         private void settingImage(JSONObject src) throws JSONException {
             RequestOptions requestOptions = new RequestOptions()
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .skipMemoryCache(true)
                     .centerCrop()
-                    .dontAnimate()
-                    .dontTransform()
                     .placeholder(R.drawable.place_holder)
-                    .error(R.drawable.place_holder)
-                    .priority(Priority.IMMEDIATE)
-                    .encodeFormat(Bitmap.CompressFormat.PNG)
-                    .format(DecodeFormat.DEFAULT)
-                    .override(150, 200);
+                    .error(R.drawable.place_holder);
             Glide.with(context.getApplicationContext())
                     .load(src.getString("medium"))
                     .apply(requestOptions)

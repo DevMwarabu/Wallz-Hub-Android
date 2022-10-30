@@ -2,6 +2,7 @@ package com.e.wallzhub.Constants.Adapters;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -50,45 +51,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private ArrayList<Object> imageModels;
+public class AdapterAds extends RecyclerView.Adapter<AdapterAds.ViewHolder> {
+    private List<ImageModel> imageModels;
     private Context context;
     private String title;
-    private static final int ITEM_TYPE_COUNTRY = 0;
-    private static final int ITEM_TYPE_BANNER_AD = 1;
     private InterstitialAd mInterstitialAd;
 
-    public AdapterAds(ArrayList<Object> imageModels, Context context, String title,InterstitialAd mInterstitialAd) {
+    public AdapterAds(List<ImageModel> imageModels, Context context, String title, InterstitialAd mInterstitialAd) {
         this.imageModels = imageModels;
         this.context = context;
         this.title = title;
         this.mInterstitialAd = mInterstitialAd;
-    }
-
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        switch (viewType) {
-            case ITEM_TYPE_BANNER_AD:
-                //Inflate ad banner container
-                View bannerLayoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.banner_ad_row, parent, false);
-
-                //Create View Holder
-                MyAdViewHolder myAdViewHolder = new MyAdViewHolder(bannerLayoutView);
-
-                return myAdViewHolder;
-            case ITEM_TYPE_COUNTRY:
-            default:
-
-                //Inflate RecyclerView row
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_main, parent, false);
-
-                //Create View Holder
-                final ViewHolderMain viewHolderMain = new ViewHolderMain(view);
-
-                return viewHolderMain;
-        }
     }
 
     public void clear() {
@@ -100,151 +73,129 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         imageModels.addAll(imageModels);
     }
 
+    @NonNull
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_main, parent, false);
+        context = parent.getContext();
+        return new ViewHolder(view);
+    }
 
-        int viewType = getItemViewType(position);
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        try {
+            holder.settingImage(imageModels.get(position).getSrc(), imageModels.get(position).getPhotographer(), imageModels.get(position).getType(), imageModels.get(position).getVideo_pictures(), imageModels.get(position).getUser());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        switch (viewType) {
-            case ITEM_TYPE_BANNER_AD:
-                if (imageModels.get(position) instanceof AdView) {
-                    MyAdViewHolder bannerHolder = (MyAdViewHolder) holder;
-                    AdView adView = (AdView) imageModels.get(position);
-                    ViewGroup adCardView = (ViewGroup) bannerHolder.itemView;
-                    if (adCardView.getChildCount() > 0) {
-                        adCardView.removeAllViews();
-                    }
-                    if (adView.getParent() != null) {
-                        ((ViewGroup) adView.getParent()).removeView(adView);
-                    }
+        holder.mImageView.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void onClick(View v) {
 
-                    // Add the banner ad to the ad view.
-                    adCardView.addView(adView);
-                }
-                break;
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) context);
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            Log.d("TAG", "The ad was dismissed.");
+                            Intent intent = new Intent(context, ImageDesc.class);
+                            try {
+                                if (imageModels.get(position).getType() < 1) {
+                                    intent.putExtra("src", imageModels.get(position).getSrc().getString("original"));
+                                } else {
+                                    for (int i=0; i<=imageModels.get(position).getVideo_files().length();i++){
+                                        if (imageModels.get(position).getVideo_files().getJSONObject(i).getString("quality").equals("sd")){
+                                            intent.putExtra("src", imageModels.get(position).getVideo_files().getJSONObject(i).getString("link"));
+                                            break;
+                                        }
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            intent.putExtra("collection", title);
+                            intent.putExtra("type", imageModels.get(position).getType());
+                            intent.putExtra("id", imageModels.get(position).getId());
 
-            case ITEM_TYPE_COUNTRY:
-            default:
-                if (imageModels.get(position) instanceof ImageModel) {
-                    ViewHolderMain viewHolderMain = (ViewHolderMain) holder;
-                    ImageModel imageModel = (ImageModel) imageModels.get(position);
-                    //setting data
+                            Pair<View, String> p1 = Pair.create((View) holder.mImageView, "image");
+
+                            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
+                            v.getContext().startActivity(intent);
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            mInterstitialAd = null;
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    Intent intent = new Intent(context, ImageDesc.class);
                     try {
-                        viewHolderMain.settingImage(imageModel.getSrc(), imageModel.getPhotographer(), imageModel.getType(), imageModel.getVideo_pictures(), imageModel.getUser());
+                        if (imageModels.get(position).getType() < 1) {
+                            intent.putExtra("src", imageModels.get(position).getSrc().getString("original"));
+                        } else {
+                            for (int i=0; i<=imageModels.get(position).getVideo_files().length();i++){
+                                if (imageModels.get(position).getVideo_files().getJSONObject(i).getString("quality").equals("sd")){
+                                    intent.putExtra("src", imageModels.get(position).getVideo_files().getJSONObject(i).getString("link"));
+                                    break;
+                                }
+                            }
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                    intent.putExtra("collection", title);
+                    intent.putExtra("type", imageModels.get(position).getType());
+                    intent.putExtra("id", imageModels.get(position).getId());
 
-                    viewHolderMain.mImageView.setOnClickListener(new View.OnClickListener() {
-                        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-                        @Override
-                        public void onClick(View v) {
+                    Pair<View, String> p1 = Pair.create((View) holder.mImageView, "image");
 
-                            if (mInterstitialAd != null) {
-                                // Show the ad
-                                mInterstitialAd.show((Activity) context);
-                                mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                                    @Override
-                                    public void onAdDismissedFullScreenContent() {
-                                        Log.d("TAG", "The ad was dismissed.");
-                                        Intent intent = new Intent(context, ImageDesc.class);
-                                        try {
-                                            if (imageModel.getType() < 1) {
-                                                intent.putExtra("src", imageModel.getSrc().getString("original"));
-                                            } else {
-                                                for (int i=0; i<=imageModel.getVideo_files().length();i++){
-                                                    if (imageModel.getVideo_files().getJSONObject(i).getString("quality").equals("sd")){
-                                                        intent.putExtra("src", imageModel.getVideo_files().getJSONObject(i).getString("link"));
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                        intent.putExtra("collection", title);
-                                        intent.putExtra("type", imageModel.getType());
-                                        intent.putExtra("id", imageModel.getId());
-
-                                        Pair<View, String> p1 = Pair.create((View) viewHolderMain.mImageView, "image");
-
-                                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
-                                        v.getContext().startActivity(intent);
-                                    }
-
-                                    @Override
-                                    public void onAdShowedFullScreenContent() {
-                                        mInterstitialAd = null;
-                                        Log.d("TAG", "The ad was shown.");
-                                    }
-                                });
-                            } else {
-                                Intent intent = new Intent(context, ImageDesc.class);
-                                try {
-                                    if (imageModel.getType() < 1) {
-                                        intent.putExtra("src", imageModel.getSrc().getString("original"));
-                                    } else {
-                                        for (int i=0; i<=imageModel.getVideo_files().length();i++){
-                                            if (imageModel.getVideo_files().getJSONObject(i).getString("quality").equals("sd")){
-                                                intent.putExtra("src", imageModel.getVideo_files().getJSONObject(i).getString("link"));
-                                                break;
-                                            }
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                intent.putExtra("collection", title);
-                                intent.putExtra("type", imageModel.getType());
-                                intent.putExtra("id", imageModel.getId());
-
-                                Pair<View, String> p1 = Pair.create((View) viewHolderMain.mImageView, "image");
-
-                                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
-                                v.getContext().startActivity(intent);
-                            }
-                        }
-                    });
-
-                    //opening photographer details on click
-                    viewHolderMain.mLinearLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                            if (mInterstitialAd != null) {
-                                // Show the ad
-                                mInterstitialAd.show((Activity) context);
-                                mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                                    @Override
-                                    public void onAdDismissedFullScreenContent() {
-                                        Log.d("TAG", "The ad was dismissed.");
-                                        //opening url
-                                        try {
-                                            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModel.getPhotographer_url())));
-                                        } catch (android.content.ActivityNotFoundException anfe) {
-                                            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModel.getPhotographer_url())));
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onAdShowedFullScreenContent() {
-                                        mInterstitialAd = null;
-                                        Log.d("TAG", "The ad was shown.");
-                                    }
-                                });
-                            } else {
-                                //opening url
-                                try {
-                                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModel.getPhotographer_url())));
-                                } catch (android.content.ActivityNotFoundException anfe) {
-                                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModel.getPhotographer_url())));
-                                }
-                            }
-                        }
-                    });
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, p1);
+                    v.getContext().startActivity(intent);
                 }
-                break;
-        }
+            }
+        });
+
+        //opening photographer details on click
+        holder.mLinearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (mInterstitialAd != null) {
+                    // Show the ad
+                    mInterstitialAd.show((Activity) context);
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            Log.d("TAG", "The ad was dismissed.");
+                            //opening url
+                            try {
+                                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModels.get(position).getPhotographer_url())));
+                            } catch (android.content.ActivityNotFoundException anfe) {
+                                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModels.get(position).getPhotographer_url())));
+                            }
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            mInterstitialAd = null;
+                            Log.d("TAG", "The ad was shown.");
+                        }
+                    });
+                } else {
+                    //opening url
+                    try {
+                        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModels.get(position).getPhotographer_url())));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(imageModels.get(position).getPhotographer_url())));
+                    }
+                }
+            }
+        });
 
     }
 
@@ -253,68 +204,33 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return imageModels.size();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (position == 0 || imageModels.get(position) instanceof ImageModel) {
-            return ITEM_TYPE_COUNTRY;
-        } else {
-            return (position % FragmentChild.ITEMS_PER_AD == 0) ? ITEM_TYPE_BANNER_AD : ITEM_TYPE_COUNTRY;
-        }
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    public class ViewHolderMain extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView mImageView, mPLay;
         private TextView mPhotographer;
-        private VideoView mVideoView;
         private LinearLayout mLinearLayout;
 
-        public ViewHolderMain(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
+            mPLay = itemView.findViewById(R.id.image_video);
             mImageView = itemView.findViewById(R.id.image_main);
             mPhotographer = itemView.findViewById(R.id.tv_photographer);
             mLinearLayout = itemView.findViewById(R.id.linear_main);
-            mPLay = itemView.findViewById(R.id.image_video);
-            mVideoView = itemView.findViewById(R.id.video_main);
         }
+
 
         private void settingImage(JSONObject src, String photographer, int type, JSONArray video_pictures, JSONObject user) throws JSONException {
 
             RequestOptions requestOptions = new RequestOptions()
-                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .skipMemoryCache(true)
                     .centerCrop()
-                    .dontAnimate()
-                    .dontTransform()
                     .placeholder(R.drawable.place_holder)
-                    .error(R.drawable.place_holder)
-                    .priority(Priority.IMMEDIATE)
-                    .encodeFormat(Bitmap.CompressFormat.PNG)
-                    .format(DecodeFormat.DEFAULT)
-                    .override(150, 200);
+                    .error(R.drawable.place_holder);
 
             switch (type) {
                 case 0:
                     Glide.with(context.getApplicationContext())
-                            .asBitmap()
                             .load(src.getString("medium"))
                             .apply(requestOptions)
-                            .dontAnimate()
-                            .into(new CustomTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    mImageView.setImageBitmap(resource);
-                                }
-
-                                @Override
-                                public void onLoadCleared(@Nullable Drawable placeholder) {
-                                }
-                            });
+                            .into(mImageView);
                     //credititng photographer
                     mPhotographer.setText(photographer);
                     mImageView.setVisibility(View.VISIBLE);
@@ -325,27 +241,11 @@ public class AdapterAds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             .asBitmap()
                             .load(video_pictures.getJSONObject(0).getString("picture") + "?auto=compress&cs=tinysrgb&h=350")
                             .apply(requestOptions)
-                            .dontAnimate()
-                            .into(new CustomTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    mImageView.setImageBitmap(resource);
-                                }
-
-                                @Override
-                                public void onLoadCleared(@Nullable Drawable placeholder) {
-                                }
-                            });
+                            .into(mImageView);
                     //credititng photographer
                     mPhotographer.setText(user.getString("name"));
                     break;
             }
-        }
-    }
-
-    public class MyAdViewHolder extends RecyclerView.ViewHolder {
-        MyAdViewHolder(View itemView) {
-            super(itemView);
         }
     }
 }
